@@ -186,9 +186,7 @@ fit_model_MultiLORS = function(data) {
     verbose = FALSE,
     n_iter = 1000,
     tolerance = 1e-6,
-    line_search = TRUE,
-    n_lambda = 3,
-    n_gamma = 3
+    line_search = TRUE
   )
 
   Y_mean = compute_Y_mean(data$train$subsetted$Y_list,
@@ -225,9 +223,7 @@ fit_model_ORC_ALL_MultiLORS = function(data) {
     verbose = FALSE,
     n_iter = 1000,
     tolerance = 1e-6,
-    line_search = TRUE,
-    n_lambda = 3,
-    n_gamma = 3
+    line_search = TRUE
   )$best_Beta
 
   Y_mean = compute_Y_mean(data$train$full$Y_list,

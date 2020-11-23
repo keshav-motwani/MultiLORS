@@ -1,6 +1,6 @@
 library(MultiLORS)
 
-ARRAY_ID = 1 # as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
+ARRAY_ID = as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
 RESULT_PATH = "results/simulations"
 dir.create(RESULT_PATH, recursive = TRUE)
 
@@ -26,7 +26,7 @@ considered_values = list(
   theta = seq(from = 10, to = 100, by = 10)
 )
 
-parameters = expand_parameters(considered_values, defaults, 50, c("ORC_L_ALL_glmnet", "ORC_ALL_MultiLORS", "MultiLORS", "glmnet", "ORC_L_glmnet"))[[ARRAY_ID]]
+parameters = expand_parameters(considered_values, defaults, 50, c("MultiLORS", "glmnet", "ORC_L_glmnet", "ORC_ALL_MultiLORS", "ORC_L_ALL_glmnet"))[[ARRAY_ID]]
 result = evaluate_parameters(parameters)
 saveRDS(result, file.path(RESULT_PATH, paste0(parameters$experiment, "_", gsub(".", "_", parameters[[parameters$experiment]], fixed = TRUE), "_", parameters$method, "_", parameters$replicate, ".rds")))
 print(result$result$test_R2)
