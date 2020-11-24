@@ -250,6 +250,22 @@ fit_model_ORC_L_glmnet = function(data) {
 
 }
 
+fit_model_ORC_ALL_glmnet = function(data) {
+
+  Beta = fit_glmnet(data$train$full$Y_list,
+                    data$train$full$X_list,
+                    data$train$full$D_list,
+                    data$validation$full$Y_list,
+                    data$validation$full$X_list,
+                    data$validation$full$D_list)
+
+  Y_mean = compute_Y_mean(data$train$full$Y_list,
+                          data$train$full$D_list)
+
+  return(list(Beta = Beta, Y_mean = Y_mean))
+
+}
+
 fit_model_ORC_L_ALL_glmnet = function(data) {
 
   Beta = fit_glmnet(mapply(x = data$train$full$Y_list, y = data$train$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
