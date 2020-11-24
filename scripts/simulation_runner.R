@@ -27,6 +27,7 @@ considered_values = list(
 )
 
 parameters = expand_parameters(considered_values, defaults, 50, c("MultiLORS", "glmnet", "ORC_L_glmnet", "ORC_ALL_MultiLORS", "ORC_L_ALL_glmnet"))[[ARRAY_ID]]
+print(parameters)
 result = evaluate_parameters(parameters)
 saveRDS(result, file.path(RESULT_PATH, paste0(parameters$experiment, "_", gsub(".", "_", parameters[[parameters$experiment]], fixed = TRUE), "_", parameters$method, "_", parameters$replicate, ".rds")))
 print(result$result$test_R2)

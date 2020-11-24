@@ -271,7 +271,7 @@ compute_performance = function(Beta, Beta_hat, Y_list_test, X_list_test, D_list_
 
   SST = sst(Y_mean_train, Y_list_test, D_list_test)
   indices_list = lapply(D_list_test, function(x) which(diag(x) == 1))
-  SSE = evaluate_g(Y_list_test, lapply(X_list_test, function(x) cbind(1, x)), rep(0, length(Y_list_test)), indices_list, Beta_hat)
+  SSE = 2 * evaluate_g(Y_list_test, lapply(X_list_test, function(x) cbind(1, x)), rep(0, length(Y_list_test)), indices_list, Beta_hat)
   R2 = 1 - SSE/SST
 
   return(list(Beta_SSE = Beta_SSE, test_R2 = R2, test_SSE = SSE, test_SST = SST, Beta_hat = Beta_hat, Beta = Beta))
