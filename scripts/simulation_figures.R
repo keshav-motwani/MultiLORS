@@ -23,6 +23,7 @@ result = do.call(rbind, results)
 summary = result %>%
   pivot_longer(Beta_SSE:test_SST, names_repair = "minimal", values_to = "result") %>%
   mutate(value = factor(value)) %>%
+  mutate(method = factor(method, levels = c("MultiLORS", "glmnet", "ORC_L_glmnet", "ORC_ALL_MultiLORS", "ORC_L_ALL_glmnet"))) %>%
   group_by(experiment, value, method, name) %>%
   summarize(mean = mean(result), two_se = 2 * sd(result)/sqrt(n())) %>%
   mutate(group = paste0(experiment, method, name))
