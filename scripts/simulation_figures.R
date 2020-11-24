@@ -49,7 +49,7 @@ for (exp in unique(summary$experiment)) {
       ) +
         geom_point(size = 0.5, position=position_dodge(0.2)) +
         geom_line(position=position_dodge(0.2)) +
-        geom_errorbar(width = 0.2, position=position_dodge(0.2), linetype = "solid") +
+        geom_errorbar(width = 0.2, position=position_dodge(0.2), linetype = "solid", show.legend = FALSE) +
         facet_wrap( ~ name, scales = "free", nrow = 1) +
         theme_classic() +
         theme(strip.background = element_blank(), strip.placement = "outside") +
