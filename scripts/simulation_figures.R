@@ -61,9 +61,10 @@ for (exp in unique(summary$experiment)) {
 names(plots) = unique(summary$experiment)
 
 plots[["r"]] =plots[["r"]] + xlab("Rank of L")
-plots[["R2"]] = plots[["R2"]] + xlab( expression(Population~R^{2}))
+plots[["R2"]] = plots[["R2"]] + xlab(expression(Population~R^{2}))
+plots[["theta"]] = plots[["theta"]] + xlab( expression(theta))
 
-wrap_plots(plots, nrow = 2) + plot_layout(guides = "collect") &
+wrap_plots(plots, nrow = length(plots)) + plot_layout(guides = "collect") &
   theme(legend.position='bottom')
 
 dir.create(file.path(RESULT_PATH, "figures"))
