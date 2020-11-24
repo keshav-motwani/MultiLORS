@@ -1,9 +1,10 @@
 library(tidyverse)
 library(patchwork)
 
-RESULT_PATH = "results/simulations/"
+RESULT_PATH = "results/simulations"
 
 files = list.files(RESULT_PATH, full.names = TRUE)
+files = files[grepl("rds", files)]
 
 results = lapply(files, function(x) {
   result = readRDS(x)
