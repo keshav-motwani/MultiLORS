@@ -50,7 +50,7 @@ for (exp in unique(summary$experiment)) {
         geom_point(size = 0.5) +
         geom_line() +
         geom_errorbar(width = 0.2) +
-        facet_wrap( ~ name, scales = "free") +
+        facet_wrap( ~ name, scales = "free", nrow = 1) +
         theme_classic() +
         theme(strip.background = element_blank(), strip.placement = "outside") +
         scale_color_manual(values = plasma_pal) +
