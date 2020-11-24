@@ -99,7 +99,7 @@ MultiLORS = function(Y_list,
       result = c(result, list(model))
 
       if (early_stopping && !is.null(Y_list_validation)) {
-        if (lambda > 5 && lambda > n_lambda/4 && model$validation_error > 1.05 * result[[length(result) - 1]][["validation_error"]]) {
+        if (lambda > 5 && lambda > n_lambda/4 && model$validation_error > result[[length(result) - 1]][["validation_error"]]) {
           break
         }
       }
