@@ -13,13 +13,15 @@ results = lapply(files, function(x) {
              method = result$parameters$method,
              replicate = result$parameters$replicate,
              Beta_SSE = result$result$Beta_SSE,
-             test_R2 = result$result$test_R2)
+             test_R2 = result$result$test_R2,
+             test_SSE = result$result$test_SSE,
+             test_SST = result$result$test_SST)
 })
 
 result = do.call(rbind, results)
 
 summary = result %>%
-  pivot_longer(Beta_SSE:test_R2, names_repair = "minimal", values_to = "result") %>%
+  pivot_longer(Beta_SSE:test_SST, names_repair = "minimal", values_to = "result") %>%
   mutate(value = factor(value)) %>%
   group_by(experiment, value, method, name) %>%
   summarize(mean = mean(result), two_se = 2 * sd(result)/sqrt(n())) %>%
@@ -68,6 +70,6 @@ wrap_plots(plots, nrow = length(plots)) + plot_layout(guides = "collect") &
   theme(legend.position='bottom')
 
 dir.create(file.path(RESULT_PATH, "figures"))
-ggsave(file.path(RESULT_PATH, "figures", "simulation_figures.pdf"), height = 4.2 * length(unique(result$experiment)), width = 8)
+ggsave(file.path(RESULT_PATH, "figures", "simulation_figures.pdf"), height = 4.2 * length(unique(result$experiment)), width = 16)
 write.csv(result, file.path(RESULT_PATH, "figures", "simulation_results.csv"))
 write.csv(summary, file.path(RESULT_PATH, "figures", "simulation_result_summary.csv"))
