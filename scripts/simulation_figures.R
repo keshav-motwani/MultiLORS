@@ -47,9 +47,9 @@ for (exp in unique(summary$experiment)) {
           ymax = mean + two_se
         )
       ) +
-        geom_point(size = 0.5) +
-        geom_line() +
-        geom_errorbar(width = 0.2) +
+        geom_point(size = 0.5, position=position_dodge(0.2)) +
+        geom_line(position=position_dodge(0.2)) +
+        geom_errorbar(width = 0.2, position=position_dodge(0.2), linetype = "solid") +
         facet_wrap( ~ name, scales = "free", nrow = 1) +
         theme_classic() +
         theme(strip.background = element_blank(), strip.placement = "outside") +
