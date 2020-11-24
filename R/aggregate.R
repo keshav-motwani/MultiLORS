@@ -42,7 +42,7 @@ aggregate_tuning_results = function(tuning_results) {
 
   }
 
-  best_lambda_gamma = which(validation_error == min(validation_error), arr.ind = TRUE)
+  best_lambda_gamma = which(validation_error == min(validation_error, na.rm = TRUE), arr.ind = TRUE)
   best_Beta = aggregated_Beta[best_lambda_gamma[1], best_lambda_gamma[2], , ]
 
   print(best_lambda_gamma)
