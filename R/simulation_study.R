@@ -28,9 +28,10 @@ generate_simulation_data = function(R2,
                                     O_k_validation,
                                     n_k_validation,
                                     O_k_test,
-                                    n_k_test) {
+                                    n_k_test,
+                                    replicate) {
 
-  set.seed(1)
+  set.seed(replicate)
 
   theta = rep(theta, r)
 
