@@ -196,69 +196,6 @@ fit_model_MultiLORS = function(data) {
   return(list(Beta = fit$best_Beta, Y_mean = Y_mean))
 }
 
-fit_model_MultiLORS_1e2 = function(data) {
-
-  fit = MultiLORS(
-    data$train$subsetted$Y_list,
-    data$train$subsetted$X_list,
-    data$train$subsetted$D_list,
-    data$validation$subsetted$Y_list,
-    data$validation$subsetted$X_list,
-    data$validation$subsetted$D_list,
-    verbose = FALSE,
-    n_iter = 1000,
-    tolerance = 1e-2,
-    line_search = TRUE
-  )
-
-  Y_mean = compute_Y_mean(data$train$subsetted$Y_list,
-                          data$train$subsetted$D_list)
-
-  return(list(Beta = fit$best_Beta, Y_mean = Y_mean))
-}
-
-fit_model_MultiLORS_1e3 = function(data) {
-
-  fit = MultiLORS(
-    data$train$subsetted$Y_list,
-    data$train$subsetted$X_list,
-    data$train$subsetted$D_list,
-    data$validation$subsetted$Y_list,
-    data$validation$subsetted$X_list,
-    data$validation$subsetted$D_list,
-    verbose = FALSE,
-    n_iter = 1000,
-    tolerance = 1e-3,
-    line_search = TRUE
-  )
-
-  Y_mean = compute_Y_mean(data$train$subsetted$Y_list,
-                          data$train$subsetted$D_list)
-
-  return(list(Beta = fit$best_Beta, Y_mean = Y_mean))
-}
-
-fit_model_MultiLORS_1e4 = function(data) {
-
-  fit = MultiLORS(
-    data$train$subsetted$Y_list,
-    data$train$subsetted$X_list,
-    data$train$subsetted$D_list,
-    data$validation$subsetted$Y_list,
-    data$validation$subsetted$X_list,
-    data$validation$subsetted$D_list,
-    verbose = FALSE,
-    n_iter = 1000,
-    tolerance = 1e-4,
-    line_search = TRUE
-  )
-
-  Y_mean = compute_Y_mean(data$train$subsetted$Y_list,
-                          data$train$subsetted$D_list)
-
-  return(list(Beta = fit$best_Beta, Y_mean = Y_mean))
-}
-
 fit_model_glmnet = function(data) {
 
   Beta = fit_glmnet(data$train$subsetted$Y_list,
