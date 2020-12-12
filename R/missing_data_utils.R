@@ -41,19 +41,6 @@ construct_D_from_indices = function(observed_indices, q) {
 
 }
 
-zero_pad_matrix = function(matrix, D) {
-
-  q = nrow(D)
-
-  observed_indices = which(diag(D) == 1)
-
-  padded = matrix(0, nrow = nrow(matrix), ncol = q)
-  padded[, observed_indices] = matrix
-
-  return(padded)
-
-}
-
 subset_observed_data_univariate = function(Y_list, X_list, D_list, index) {
 
   new_Y_list = list()

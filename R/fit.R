@@ -1,9 +1,9 @@
 fit = function(Y_list,
                X_list,
-               D_list,
+               q,
                indices_list,
                XtX_list,
-               XtY_dot_list,
+               XtY_list,
                X_mean,
                X_sd,
                lambda,
@@ -19,7 +19,7 @@ fit = function(Y_list,
 
   objective = numeric(2 * n_iter)
 
-  if (is.null(Beta_old)) Beta_old = matrix(0, nrow = ncol(X_list[[1]]), ncol = ncol(D_list[[1]]))
+  if (is.null(Beta_old)) Beta_old = matrix(0, nrow = ncol(X_list[[1]]), ncol = q)
   if (is.null(L_list_old)) L_list_old = lapply(Y_list, function(k) matrix(0, nrow = nrow(k), ncol = ncol(k)))
 
   s = s_Beta * 10
@@ -37,10 +37,10 @@ fit = function(Y_list,
     Beta_update = update_Beta(Y_list = Y_list,
                               X_list = X_list,
                               L_list = L_list_new,
-                              D_list = D_list,
+                              q = q,
                               indices_list = indices_list,
                               XtX_list = XtX_list,
-                              XtY_dot_list = XtY_dot_list,
+                              XtY_list = XtY_list,
                               Beta_old = Beta_old,
                               lambda = lambda,
                               s_Beta = s_Beta,

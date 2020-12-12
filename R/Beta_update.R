@@ -1,10 +1,11 @@
-update_Beta = function(Y_list, X_list, L_list, D_list, indices_list, XtX_list, XtY_dot_list, Beta_old, lambda, s_Beta, s, line_search) {
+update_Beta = function(Y_list, X_list, L_list, q, indices_list, XtX_list, XtY_list, Beta_old, lambda, s_Beta, s, line_search) {
 
   gradient = compute_gradient_Beta(X_list = X_list,
                                    L_list = L_list,
-                                   D_list = D_list,
+                                   q = q,
+                                   indices_list = indices_list,
                                    XtX_list = XtX_list,
-                                   XtY_dot_list = XtY_dot_list,
+                                   XtY_list = XtY_list,
                                    Beta_old = Beta_old)
 
   shrinkage = 0.5
@@ -48,19 +49,19 @@ update_Beta = function(Y_list, X_list, L_list, D_list, indices_list, XtX_list, X
 
 }
 
-compute_gradient_Beta = function(X_list, L_list, D_list, XtX_list, XtY_dot_list, Beta_old) {
+compute_gradient_Beta = function(X_list, L_list, q, indices_list, XtX_list, XtY_list, Beta_old) {
 
-  gradient = matrix(0, nrow = ncol(X_list[[1]]), ncol = nrow(D_list[[1]]))
+  gradient = matrix(0, nrow = ncol(X_list[[1]]), ncol = q)
 
-  for (k in 1:length(XtY_dot_list)) {
+  for (k in 1:length(X_list)) {
 
-    one = XtX_list[[k]] %*% Beta_old %*% D_list[[k]]
+    one = XtX_list[[k]] %*% Beta_old[, indices_list[[k]], drop = FALSE]
 
-    two = crossprod(X_list[[k]], zero_pad_matrix(L_list[[k]], D_list[[k]]))
+    two = crossprod(X_list[[k]], L_list[[k]])
 
-    three = XtY_dot_list[[k]]
+    three = XtY_list[[k]]
 
-    gradient = gradient + one + two - three
+    gradient[, indices_list[[k]]] = gradient[, indices_list[[k]]] + one + two - three
 
   }
 
@@ -68,13 +69,13 @@ compute_gradient_Beta = function(X_list, L_list, D_list, XtX_list, XtY_dot_list,
 
 }
 
-compute_s_Beta = function(XtX_list, D_list) {
+compute_s_Beta = function(XtX_list, q, indices_list) {
 
-  max_eigenvalues = numeric(nrow(D_list[[1]]))
+  max_eigenvalues = numeric(q)
 
   for (j in 1:length(max_eigenvalues)) {
 
-    P_j = which(sapply(D_list, function(k) k[j, j] == 1))
+    P_j = which(sapply(indices_list, function(k) j %in% k))
 
     block = Reduce('+', XtX_list[P_j])
 

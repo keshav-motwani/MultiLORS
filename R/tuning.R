@@ -14,17 +14,17 @@ compute_candidate_gamma_sequence = function(n_gamma, min_ratio) {
 
 }
 
-compute_candidate_lambda_grid = function(Y_list, X_list, D_list, XtY_dot_list, gamma_weights, gamma_sequence, n_lambda, min_ratio) {
+compute_candidate_lambda_grid = function(Y_list, X_list, q, indices_list, XtY_list, gamma_weights, gamma_sequence, n_lambda, min_ratio) {
 
-  lambda = sapply(gamma_sequence, function(gamma) compute_candidate_lambda_sequence_fixed_gamma(Y_list, X_list, D_list, XtY_dot_list, n_lambda, min_ratio, gamma_weights, gamma))
+  lambda = sapply(gamma_sequence, function(gamma) compute_candidate_lambda_sequence_fixed_gamma(Y_list, X_list, q, indices_list, XtY_list, n_lambda, min_ratio, gamma_weights, gamma))
 
   return(lambda)
 
 }
 
-compute_candidate_lambda_sequence_fixed_gamma = function(Y_list, X_list, D_list, XtY_dot_list, n_lambda, min_ratio, gamma_weights, gamma) {
+compute_candidate_lambda_sequence_fixed_gamma = function(Y_list, X_list, q, indices_list, XtY_list, n_lambda, min_ratio, gamma_weights, gamma) {
 
-  result = matrix(0, nrow = nrow(XtY_dot_list[[1]]), ncol = ncol(XtY_dot_list[[1]]))
+  result = matrix(0, nrow = ncol(X_list[[1]]), ncol = q)
 
   for (k in 1:length(Y_list)) {
 
@@ -32,7 +32,7 @@ compute_candidate_lambda_sequence_fixed_gamma = function(Y_list, X_list, D_list,
 
     L_k = nuclear_prox(Y_list[[k]], gamma_k)
 
-    result = result + crossprod(X_list[[k]], zero_pad_matrix(L_k, D_list[[k]])) - XtY_dot_list[[k]]
+    result[, indices_list[[k]]] = result[, indices_list[[k]]] + crossprod(X_list[[k]], L_k) - XtY_list[[k]]
 
   }
 

@@ -38,7 +38,7 @@ aggregate_tuning_results = function(tuning_results) {
 
     aggregated_n_iter[lambda, gamma] = model$n_iter
 
-    validation_error[lambda, gamma] = model$validation_error
+    if (!is.null(model$validation_error)) validation_error[lambda, gamma] = model$validation_error
 
   }
 

@@ -40,8 +40,8 @@ MultiLORS = function(Y_list,
   X_sd = attributes(X_list)$sd
   X_list = lapply(X_list, function(k) cbind(1, k))
   XtX_list = lapply(X_list, crossprod)
-  Y_dot_list = mapply(zero_pad_matrix, Y_list, D_list, SIMPLIFY = FALSE)
-  XtY_dot_list = mapply(crossprod, x = X_list, y = Y_dot_list, SIMPLIFY = FALSE)
+  XtY_list = mapply(crossprod, x = X_list, y = Y_list, SIMPLIFY = FALSE)
+  q = ncol(D_list[[1]])
   indices_list = lapply(D_list, function(k) which(diag(k) == 1))
   if (!is.null(X_list_validation)) {
     X_list_validation = lapply(X_list_validation, function(k) cbind(1, k))
@@ -50,15 +50,15 @@ MultiLORS = function(Y_list,
 
   gamma_weights = compute_gamma_weights(Y_list)
   gamma_sequence = compute_candidate_gamma_sequence(n_gamma, gamma_min_ratio)
-  lambda_grid = compute_candidate_lambda_grid(Y_list, X_list, D_list, XtY_dot_list, gamma_weights, gamma_sequence, n_lambda, lambda_min_ratio)
+  lambda_grid = compute_candidate_lambda_grid(Y_list, X_list, q, indices_list, XtY_list, gamma_weights, gamma_sequence, n_lambda, lambda_min_ratio)
 
-  s_Beta = compute_s_Beta(XtX_list, D_list)
+  s_Beta = compute_s_Beta(XtX_list, q, indices_list)
 
   result = list()
 
   for (gamma in 1:n_gamma) {
 
-    Beta_old = matrix(0, nrow = ncol(X_list[[1]]), ncol = ncol(D_list[[1]]))
+    Beta_old = matrix(0, nrow = ncol(X_list[[1]]), ncol = q)
     L_list_old = lapply(Y_list, function(k) matrix(0, nrow = nrow(k), ncol = ncol(k)))
 
     for (lambda in 1:n_lambda) {
@@ -69,10 +69,10 @@ MultiLORS = function(Y_list,
         model = fit(
           Y_list = Y_list,
           X_list = X_list,
-          D_list = D_list,
+          q = q,
           indices_list = indices_list,
           XtX_list = XtX_list,
-          XtY_dot_list = XtY_dot_list,
+          XtY_list = XtY_list,
           X_mean = X_mean,
           X_sd = X_sd,
           lambda = lambda_grid[gamma, lambda],
