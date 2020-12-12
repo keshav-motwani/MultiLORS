@@ -40,7 +40,7 @@ MultiLORS = function(Y_list,
   X_sd = attributes(X_list)$sd
   X_list = lapply(X_list, function(k) cbind(1, k))
   XtX_list = lapply(X_list, crossprod)
-  Y_dot_list = mapply(zero_pad_matrix, Y_list, D_list)
+  Y_dot_list = mapply(zero_pad_matrix, Y_list, D_list, SIMPLIFY = FALSE)
   XtY_dot_list = mapply(crossprod, x = X_list, y = Y_dot_list, SIMPLIFY = FALSE)
   indices_list = lapply(D_list, function(k) which(diag(k) == 1))
   if (!is.null(X_list_validation)) {
