@@ -17,7 +17,8 @@ generate_simulation_data(
   O_k_validation,
   n_k_validation,
   O_k_test,
-  n_k_test
+  n_k_test,
+  replicate
 )
 }
 \arguments{
