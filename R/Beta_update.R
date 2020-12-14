@@ -18,7 +18,7 @@ update_Beta = function(Y_list, X_list, L_list, q, indices_list, XtX_list, XtY_li
 
     while(line_search & s != s_Beta) {
 
-      Beta = l1_prox(Beta_old - (s * gradient), s * lambda)
+      Beta = l1_prox(Beta_old - (s * gradient), s * lambda, TRUE)
 
       g_new = evaluate_g(Y_list, X_list, L_list, indices_list, Beta)
 
@@ -38,7 +38,7 @@ update_Beta = function(Y_list, X_list, L_list, q, indices_list, XtX_list, XtY_li
 
   } else {
 
-    Beta = l1_prox(Beta_old - (s_Beta * gradient), s_Beta * lambda)
+    Beta = l1_prox(Beta_old - (s_Beta * gradient), s_Beta * lambda, TRUE)
     s = 0
 
   }
@@ -49,25 +49,25 @@ update_Beta = function(Y_list, X_list, L_list, q, indices_list, XtX_list, XtY_li
 
 }
 
-compute_gradient_Beta = function(X_list, L_list, q, indices_list, XtX_list, XtY_list, Beta_old) {
-
-  gradient = matrix(0, nrow = ncol(X_list[[1]]), ncol = q)
-
-  for (k in 1:length(X_list)) {
-
-    one = XtX_list[[k]] %*% Beta_old[, indices_list[[k]], drop = FALSE]
-
-    two = crossprod(X_list[[k]], L_list[[k]])
-
-    three = XtY_list[[k]]
-
-    gradient[, indices_list[[k]]] = gradient[, indices_list[[k]]] + one + two - three
-
-  }
-
-  return(gradient)
-
-}
+# compute_gradient_Beta = function(X_list, L_list, q, indices_list, XtX_list, XtY_list, Beta_old) {
+#
+#   gradient = matrix(0, nrow = ncol(X_list[[1]]), ncol = q)
+#
+#   for (k in 1:length(X_list)) {
+#
+#     one = XtX_list[[k]] %*% Beta_old[, indices_list[[k]], drop = FALSE]
+#
+#     two = crossprod(X_list[[k]], L_list[[k]])
+#
+#     three = XtY_list[[k]]
+#
+#     gradient[, indices_list[[k]]] = gradient[, indices_list[[k]]] + one + two - three
+#
+#   }
+#
+#   return(gradient)
+#
+# }
 
 compute_s_Beta = function(XtX_list, q, indices_list) {
 
