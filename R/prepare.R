@@ -6,23 +6,23 @@
 #' @export
 prepare_Y_and_indices_train = function(Y_list_train) {
 
-  union = sort(unique(unlist(lapply(Y_list, colnames))))
+  union = sort(unique(unlist(lapply(Y_list_train, colnames))))
 
   map = 1:length(union)
   names(map) = union
 
-  for (k in 1:length(Y_list)) {
+  for (k in 1:length(Y_list_train)) {
 
-    Y_list[[k]] = Y_list[[k]][, order(colnames(Y_list[[k]])), drop = FALSE]
+    Y_list_train[[k]] = Y_list_train[[k]][, sort(colnames(Y_list_train[[k]])), drop = FALSE]
 
   }
 
-  indices = lapply(Y_list, function(k) map[colnames(k)])
+  indices = lapply(Y_list_train, function(k) map[colnames(k)])
 
   attr(indices, "map") = map
   attr(indices, "responses") = names(map)
 
-  return(list(Y_list = Y_list, indices_list = indices))
+  return(list(Y_list = Y_list_train, indices_list = indices))
 
 }
 
@@ -36,18 +36,18 @@ prepare_Y_and_indices_test = function(Y_list_test, indices_list_train) {
 
   map = attr(indices_list_train, "map")
 
-  for (k in 1:length(Y_list)) {
+  for (k in 1:length(Y_list_test)) {
 
-    Y_list[[k]] = Y_list[[k]][, order(intersect(names(map), colnames(Y_list[[k]]))), drop = FALSE]
+    Y_list_test[[k]] = Y_list_test[[k]][, sort(intersect(names(map), colnames(Y_list_test[[k]]))), drop = FALSE]
 
   }
 
-  indices = lapply(Y_list, function(k) map[colnames(k)])
+  indices = lapply(Y_list_test, function(k) map[colnames(k)])
 
   attr(indices, "map") = map
   attr(indices, "responses") = names(map)
 
-  return(list(Y_list = Y_list, indices_list = indices))
+  return(list(Y_list = Y_list_test, indices_list = indices))
 
 }
 
