@@ -1,10 +1,7 @@
-#include <RcppArmadillo.h>
-
-using namespace Rcpp;
-
+#include "prox.h"
 
 // [[Rcpp::export]]
-arma::mat l1_prox(const arma::mat & matrix, double lambda, bool intercept) {
+arma::mat l1_prox(const arma::mat & matrix, double lambda) {
 
   arma::mat thresholded(matrix.n_rows, matrix.n_cols);
   thresholded.zeros();
@@ -15,11 +12,7 @@ arma::mat l1_prox(const arma::mat & matrix, double lambda, bool intercept) {
   arma::uvec less = arma::find(matrix < -lambda);
   thresholded.elem(less) = matrix.elem(less) + lambda;
 
-  if (intercept) {
-
-    thresholded.row(0) = matrix.row(0);
-
-  }
+  thresholded.row(0) = matrix.row(0);
 
   return thresholded;
 

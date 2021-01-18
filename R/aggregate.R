@@ -1,60 +1,35 @@
-#' Aggregate LORS results computed with different lambda, gamma
-#'
-#' @param tuning_results
-#' @param Y_list_validation
-#' @param X_list_validation
-#' @param D_list_validation
-#'
-#' @return
-#' @export
-aggregate_tuning_results = function(tuning_results) {
+aggregate_tuning_results = function(tuning_results, n_lambda, n_gamma) {
 
-  n_lambda = max(sapply(tuning_results, `[[`, "lambda_index"))
-  n_gamma = max(sapply(tuning_results, `[[`, "gamma_index"))
   p = nrow(tuning_results[[1]]$Beta)
   q = ncol(tuning_results[[1]]$Beta)
 
-  aggregated_Beta = array(dim = c(n_lambda, n_gamma, p, q))
-  aggregated_L_list = lapply(tuning_results[[1]]$L_list, function(k) array(dim = c(n_lambda, n_gamma, nrow(k), ncol(k))))
-  aggregated_nuclear_norm_penalty = matrix(NA, nrow = n_lambda, ncol = n_gamma)
-  aggregated_l1_penalty = matrix(NA, nrow = n_lambda, ncol = n_gamma)
   aggregated_n_iter = matrix(NA, nrow = n_lambda, ncol = n_gamma)
+
   validation_error = matrix(NA, nrow = n_lambda, ncol = n_gamma)
+  avg_validation_R2 = matrix(NA, nrow = n_lambda, ncol = n_gamma)
+  weighted_avg_validation_R2 = matrix(NA, nrow = n_lambda, ncol = n_gamma)
 
-  for (model in tuning_results) {
+  for (solution_path in tuning_results) {
 
-    lambda = model$lambda_index
-    gamma = model$gamma_index
+    for (model in solution_path) {
 
-    aggregated_Beta[lambda, gamma, 1:p, 1:q] = as.numeric(model$Beta)
+      lambda = model$lambda_index
+      gamma = model$gamma_index
 
-    for (k in 1:length(model$L_list)) {
-      aggregated_L_list[[k]][lambda, gamma, , ] = model$L_list[[k]]
+      aggregated_n_iter[gamma, lambda] = model$n_iter
+
+      if (!is.null(model$validation_error)) validation_error[gamma, lambda] = model$validation_error
+      if (!is.null(model$avg_validation_R2)) avg_validation_R2[gamma, lambda] = model$avg_validation_R2
+      if (!is.null(model$weighted_avg_validation_R2)) weighted_avg_validation_R2[gamma, lambda] = model$weighted_avg_validation_R2
+
     }
-
-    aggregated_nuclear_norm_penalty[lambda, gamma] = nuclear_norm_penalty(model$L_list, 1, rep(1, length(model$L_list)))
-
-    aggregated_l1_penalty[lambda, gamma] = l1_penalty(model$Beta[-1, ], 1)
-
-    aggregated_n_iter[lambda, gamma] = model$n_iter
-
-    if (!is.null(model$validation_error)) validation_error[lambda, gamma] = model$validation_error
 
   }
 
-  best_lambda_gamma = which(validation_error == min(validation_error, na.rm = TRUE), arr.ind = TRUE)
-  best_Beta = aggregated_Beta[best_lambda_gamma[1], best_lambda_gamma[2], , ]
-
-  print(best_lambda_gamma)
-
-  return(list(Beta = aggregated_Beta,
-              L_list = aggregated_L_list,
-              nuclear_norm_penalty = aggregated_nuclear_norm_penalty,
-              l1_penalty = aggregated_l1_penalty,
-              n_iter = aggregated_n_iter,
+  return(list(model_fits = tuning_results,
               validation_error = validation_error,
-              best_lambda = best_lambda_gamma[1],
-              best_gamma = best_lambda_gamma[2],
-              best_Beta = best_Beta))
+              avg_validation_R2 = avg_validation_R2,
+              weighted_avg_validation_R2 = weighted_avg_validation_R2,
+              n_iter = aggregated_n_iter))
 
 }

@@ -16,7 +16,7 @@ compute_candidate_gamma_sequence = function(n_gamma, min_ratio) {
 
 compute_candidate_lambda_grid = function(Y_list, X_list, q, indices_list, XtY_list, gamma_weights, gamma_sequence, n_lambda, min_ratio) {
 
-  lambda = sapply(gamma_sequence, function(gamma) compute_candidate_lambda_sequence_fixed_gamma(Y_list, X_list, q, indices_list, XtY_list, n_lambda, min_ratio, gamma_weights, gamma))
+  lambda = t(sapply(gamma_sequence, function(gamma) compute_candidate_lambda_sequence_fixed_gamma(Y_list, X_list, q, indices_list, XtY_list, n_lambda, min_ratio, gamma_weights, gamma)))
 
   return(lambda)
 
@@ -33,6 +33,26 @@ compute_candidate_lambda_sequence_fixed_gamma = function(Y_list, X_list, q, indi
     L_k = nuclear_prox(Y_list[[k]], gamma_k)
 
     result[, indices_list[[k]]] = result[, indices_list[[k]]] + crossprod(X_list[[k]], L_k) - XtY_list[[k]]
+
+  }
+
+  max_lambda = max(abs(result[-1, ]))
+
+  lambda = log_seq(max_lambda, max_lambda * min_ratio, n_lambda)
+
+  return(lambda)
+
+}
+
+compute_candidate_lambda_sequence_glmnet = function(Y_list, X_list, q, indices_list, n_lambda, min_ratio) {
+
+  X_list = lapply(X_list, function(x) cbind(1, x))
+
+  result = matrix(0, nrow = ncol(X_list[[1]]), ncol = q)
+
+  for (k in 1:length(Y_list)) {
+
+    result[, indices_list[[k]]] = result[, indices_list[[k]]] + crossprod(X_list[[k]], Y_list[[k]])
 
   }
 

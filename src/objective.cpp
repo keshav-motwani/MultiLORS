@@ -1,6 +1,4 @@
-#include <RcppArmadillo.h>
-
-using namespace Rcpp;
+#include "objective.h"
 
 // [[Rcpp::export]]
 double evaluate_g(const List & Y_list, const List & X_list, const List & L_list, const List & indices_list, const arma::mat & Beta) {
@@ -25,6 +23,30 @@ double evaluate_g(const List & Y_list, const List & X_list, const List & L_list,
   }
 
   return error / 2;
+
+}
+
+// [[Rcpp::export]]
+double compute_error(const List & Y_list, const List & X_list, const List & indices_list, const arma::mat & Beta) {
+
+  R_xlen_t K = X_list.size();
+
+  double error = 0;
+
+  for (R_xlen_t i = 0; i < K; i++) {
+
+    NumericMatrix X = X_list[i];
+    NumericMatrix Y = Y_list[i];
+    arma::uvec indices = indices_list[i];
+
+    arma::mat X_(X.begin(), X.nrow(), X.ncol(), false);
+    arma::mat Y_(Y.begin(), Y.nrow(), Y.ncol(), false);
+
+    error += arma::accu(arma::pow(Y_ - X_ * Beta.cols(indices - 1), 2));
+
+  }
+
+  return error;
 
 }
 

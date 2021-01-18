@@ -1,42 +1,86 @@
+#' Fit glmnet model on concatenated data
+#'
+#' @param Y_list
+#' @param X_list
+#' @param D_list
+#' @param Y_list_validation
+#' @param X_list_validation
+#' @param D_list_validation
+#'
+#' @return
+#' @export
 fit_glmnet = function(Y_list,
                       X_list,
-                      D_list,
+                      indices_list,
                       Y_list_validation,
                       X_list_validation,
-                      D_list_validation) {
+                      indices_list_validation,
+                      n_lambda = 20,
+                      lambda_min_ratio = 0.001) {
 
-  Beta = matrix(ncol = ncol(D_list[[1]]), nrow = ncol(X_list[[1]]) + 1)
+  p = ncol(X_list[[1]])
+  q = max(unlist(indices_list))
+  if (!is.null(X_list_validation)) {
+    X_list_validation = lapply(X_list_validation, function(k) cbind(1, k))
+  }
 
-  for (index in 1:ncol(D_list[[1]])) {
+  lambda_sequence = compute_candidate_lambda_sequence_glmnet(Y_list, standardize_X(X_list), q, indices_list, n_lambda, lambda_min_ratio)
 
-    data = subset_observed_data_univariate(Y_list, X_list, D_list, index)
-    data_validation = subset_observed_data_univariate(Y_list_validation, X_list_validation, D_list_validation, index)
+  Beta = array(dim = c(p + 1, q, n_lambda))
 
-    fit = fit_glmnet_univariate(data$Y, data$X, data_validation$Y, data_validation$X)
-    Beta[, index] = fit
+  for (index in 1:q) {
+
+    data = subset_observed_data_univariate(Y_list, X_list, indices_list, index)
+
+    fit = fit_glmnet_univariate(data$Y, data$X, lambda_sequence)
+    Beta[, index, ] = fit
 
   }
 
-  return(Beta)
+  validation_error = numeric(n_lambda)
+  avg_validation_R2 = numeric(n_lambda)
+  weighted_avg_validation_R2 = numeric(n_lambda)
+
+  models = list()
+
+  for (lambda in 1:n_lambda) {
+
+    fit = list(Beta = as(Beta[, , lambda], "dgCMatrix"))
+    colnames(fit$Beta) = attr(indices_list, "responses")
+
+    if (!is.null(Y_list_validation)) {
+
+      error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, Beta[, , lambda])
+      avg_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, Beta[, , lambda])
+      weighted_avg_R2 = compute_weighted_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, Beta[, , lambda])
+
+      validation_error[lambda] = error
+      avg_validation_R2[lambda] = avg_R2
+      weighted_avg_validation_R2[lambda] = weighted_avg_R2
+
+      fit$validation_error = error
+      fit$avg_validation_R2 = avg_R2
+      fit$weighted_avg_validation_R2 = weighted_avg_R2
+
+    }
+
+    models = c(models, list(fit))
+
+  }
+
+  return(list(model_fits = models,
+              validation_error = validation_error,
+              avg_validation_R2 = avg_validation_R2,
+              weighted_avg_validation_R2 = weighted_avg_validation_R2,
+              lambda_sequence = lambda_sequence))
 
 }
 
-fit_glmnet_univariate = function(Y, X, Y_validation, X_validation) {
+#' @importFrom glmnet glmnet
+fit_glmnet_univariate = function(Y, X, lambda_sequence) {
 
-  fit = glmnet::glmnet(X, Y)
+  fit = glmnet(X, Y, lambda = lambda_sequence/length(Y))
 
-  errors = numeric(length = length(fit$lambda))
-
-  predictions = predict(fit, newx = X_validation)
-
-  for (i in 1:length(fit$lambda)) {
-
-    errors[i] = sum((Y_validation - predictions[, i]) ^ 2)
-
-  }
-
-  Beta = coef(fit)[, which.min(errors)]
-
-  return(Beta)
+  return(as.matrix(coef(fit)))
 
 }

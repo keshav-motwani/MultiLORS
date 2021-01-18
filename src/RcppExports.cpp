@@ -23,6 +23,41 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// update_Beta
+arma::mat update_Beta(const List& Y_list, const List& X_list, const List& L_list, int q, const List& indices_list, const List& XtX_list, const List& XtY_list, const arma::mat& Beta_old, double lambda, double s_Beta, double s);
+RcppExport SEXP _MultiLORS_update_Beta(SEXP Y_listSEXP, SEXP X_listSEXP, SEXP L_listSEXP, SEXP qSEXP, SEXP indices_listSEXP, SEXP XtX_listSEXP, SEXP XtY_listSEXP, SEXP Beta_oldSEXP, SEXP lambdaSEXP, SEXP s_BetaSEXP, SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const List& >::type Y_list(Y_listSEXP);
+    Rcpp::traits::input_parameter< const List& >::type X_list(X_listSEXP);
+    Rcpp::traits::input_parameter< const List& >::type L_list(L_listSEXP);
+    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    Rcpp::traits::input_parameter< const List& >::type indices_list(indices_listSEXP);
+    Rcpp::traits::input_parameter< const List& >::type XtX_list(XtX_listSEXP);
+    Rcpp::traits::input_parameter< const List& >::type XtY_list(XtY_listSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Beta_old(Beta_oldSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type s_Beta(s_BetaSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_Beta(Y_list, X_list, L_list, q, indices_list, XtX_list, XtY_list, Beta_old, lambda, s_Beta, s));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_s_Beta
+double compute_s_Beta(const List& XtX_list, int p, int q, const List& dataset_indices_list);
+RcppExport SEXP _MultiLORS_compute_s_Beta(SEXP XtX_listSEXP, SEXP pSEXP, SEXP qSEXP, SEXP dataset_indices_listSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const List& >::type XtX_list(XtX_listSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    Rcpp::traits::input_parameter< const List& >::type dataset_indices_list(dataset_indices_listSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_s_Beta(XtX_list, p, q, dataset_indices_list));
+    return rcpp_result_gen;
+END_RCPP
+}
 // evaluate_g
 double evaluate_g(const List& Y_list, const List& X_list, const List& L_list, const List& indices_list, const arma::mat& Beta);
 RcppExport SEXP _MultiLORS_evaluate_g(SEXP Y_listSEXP, SEXP X_listSEXP, SEXP L_listSEXP, SEXP indices_listSEXP, SEXP BetaSEXP) {
@@ -35,6 +70,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const List& >::type indices_list(indices_listSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type Beta(BetaSEXP);
     rcpp_result_gen = Rcpp::wrap(evaluate_g(Y_list, X_list, L_list, indices_list, Beta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_error
+double compute_error(const List& Y_list, const List& X_list, const List& indices_list, const arma::mat& Beta);
+RcppExport SEXP _MultiLORS_compute_error(SEXP Y_listSEXP, SEXP X_listSEXP, SEXP indices_listSEXP, SEXP BetaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const List& >::type Y_list(Y_listSEXP);
+    Rcpp::traits::input_parameter< const List& >::type X_list(X_listSEXP);
+    Rcpp::traits::input_parameter< const List& >::type indices_list(indices_listSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Beta(BetaSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_error(Y_list, X_list, indices_list, Beta));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -82,15 +131,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // l1_prox
-arma::mat l1_prox(const arma::mat& matrix, double lambda, bool intercept);
-RcppExport SEXP _MultiLORS_l1_prox(SEXP matrixSEXP, SEXP lambdaSEXP, SEXP interceptSEXP) {
+arma::mat l1_prox(const arma::mat& matrix, double lambda);
+RcppExport SEXP _MultiLORS_l1_prox(SEXP matrixSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type matrix(matrixSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< bool >::type intercept(interceptSEXP);
-    rcpp_result_gen = Rcpp::wrap(l1_prox(matrix, lambda, intercept));
+    rcpp_result_gen = Rcpp::wrap(l1_prox(matrix, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -109,11 +157,14 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_MultiLORS_compute_gradient_Beta", (DL_FUNC) &_MultiLORS_compute_gradient_Beta, 7},
+    {"_MultiLORS_update_Beta", (DL_FUNC) &_MultiLORS_update_Beta, 11},
+    {"_MultiLORS_compute_s_Beta", (DL_FUNC) &_MultiLORS_compute_s_Beta, 4},
     {"_MultiLORS_evaluate_g", (DL_FUNC) &_MultiLORS_evaluate_g, 5},
+    {"_MultiLORS_compute_error", (DL_FUNC) &_MultiLORS_compute_error, 4},
     {"_MultiLORS_l1_penalty", (DL_FUNC) &_MultiLORS_l1_penalty, 2},
     {"_MultiLORS_nuclear_norm_penalty", (DL_FUNC) &_MultiLORS_nuclear_norm_penalty, 3},
     {"_MultiLORS_evaluate_objective", (DL_FUNC) &_MultiLORS_evaluate_objective, 8},
-    {"_MultiLORS_l1_prox", (DL_FUNC) &_MultiLORS_l1_prox, 3},
+    {"_MultiLORS_l1_prox", (DL_FUNC) &_MultiLORS_l1_prox, 2},
     {"_MultiLORS_nuclear_prox", (DL_FUNC) &_MultiLORS_nuclear_prox, 2},
     {NULL, NULL, 0}
 };

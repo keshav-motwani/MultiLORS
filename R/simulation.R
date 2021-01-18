@@ -195,8 +195,6 @@ subset_simulated_data = function(Y_list, L_list, E_list, O_k) {
 
     q = ncol(Y_list[[1]])
 
-    stopifnot(all(O_k <= q) & sum(O_k) >= q)
-
     total_remaining = sum(O_k)
     available_indices = 1:q
 
@@ -228,16 +226,14 @@ subset_simulated_data = function(Y_list, L_list, E_list, O_k) {
 
   indices = lapply(indices, function(x) sort(unique(x)))
 
-  Y_list = mapply(function(m, i) m[, i], m = Y_list, i = indices, SIMPLIFY = FALSE)
-  L_list = mapply(function(m, i) m[, i], m = L_list, i = indices, SIMPLIFY = FALSE)
-  E_list = mapply(function(m, i) m[, i], m = E_list, i = indices, SIMPLIFY = FALSE)
-
-  D_list = lapply(indices, function(k) construct_D_from_indices(k, q))
+  Y_list = mapply(function(m, i) m[, i, drop = FALSE], m = Y_list, i = indices, SIMPLIFY = FALSE)
+  L_list = mapply(function(m, i) m[, i, drop = FALSE], m = L_list, i = indices, SIMPLIFY = FALSE)
+  E_list = mapply(function(m, i) m[, i, drop = FALSE], m = E_list, i = indices, SIMPLIFY = FALSE)
 
   return(list(Y_list = Y_list,
          L_list = L_list,
          E_list = E_list,
-         D_list = D_list))
+         indices_list = indices))
 
 }
 

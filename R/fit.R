@@ -10,19 +10,17 @@ fit = function(Y_list,
                gamma,
                gamma_weights,
                Beta_old,
-               L_list_old,
                s_Beta,
                n_iter,
                tolerance,
-               line_search,
-               verbose) {
+               verbose,
+               return_L) {
 
   objective = numeric(2 * n_iter)
 
   if (is.null(Beta_old)) Beta_old = matrix(0, nrow = ncol(X_list[[1]]), ncol = q)
-  if (is.null(L_list_old)) L_list_old = lapply(Y_list, function(k) matrix(0, nrow = nrow(k), ncol = ncol(k)))
 
-  s = s_Beta * 10
+  s = s_Beta * 100
 
   for (iter in 1:n_iter) {
 
@@ -34,7 +32,7 @@ fit = function(Y_list,
                           gamma = gamma)
     objective[2 * iter - 1] = evaluate_objective(Y_list, X_list, L_list_new, indices_list, Beta_old, lambda, gamma, gamma_weights)
 
-    Beta_update = update_Beta(Y_list = Y_list,
+    Beta_new = update_Beta(Y_list = Y_list,
                               X_list = X_list,
                               L_list = L_list_new,
                               q = q,
@@ -44,15 +42,13 @@ fit = function(Y_list,
                               Beta_old = Beta_old,
                               lambda = lambda,
                               s_Beta = s_Beta,
-                              s = s,
-                              line_search = line_search)
-    Beta_new = Beta_update$Beta
+                              s = s)
     objective[2 * iter] = evaluate_objective(Y_list, X_list, L_list_new, indices_list, Beta_new, lambda, gamma, gamma_weights)
 
     last_step = objective[2 * (iter - 1)]
     this_step = objective[2 * iter]
 
-    if (verbose) print(paste0("Iteration ", iter, ": ", this_step))
+    if (verbose == 2) print(paste0("Iteration ", iter, ": ", this_step))
 
     if (iter > 1 && (last_step - this_step)/last_step < tolerance) {
       break
@@ -60,15 +56,22 @@ fit = function(Y_list,
 
     Beta_old = Beta_new
     L_list_old = L_list_new
-    s = Beta_update$s * 10
 
   }
 
+  if (verbose > 0) print(paste0("# of iterations: ", iter, "; difference = ", round((last_step - this_step)/last_step, 5)))
+
   objective = objective[1:(2 * iter)]
+
+  if (return_L) {
+    L_list = compress_L(L_list_new)
+  } else {
+    L_list = NULL
+  }
 
   result = list(
     Beta = adjust_Beta(Beta_new, X_mean, X_sd),
-    L_list = L_list_new,
+    L_list = L_list,
     objective = objective,
     n_iter = iter,
     lambda = lambda,

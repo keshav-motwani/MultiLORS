@@ -4,7 +4,7 @@ standardize_X = function(X_list) {
   k = rep(1:length(X_list), sapply(X_list, nrow))
 
   means = Matrix::colMeans(X)
-  vars = matrixStats::colVars(as.matrix(X))
+  vars = matrixStats::colVars(as.matrix(X)) * (nrow(X) - 1) / nrow(X)
 
   X = X - tcrossprod(rep(1, nrow(X)), means)
   X = X %*% diag(1 / sqrt(vars))

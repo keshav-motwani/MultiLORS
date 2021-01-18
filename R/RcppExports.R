@@ -5,8 +5,20 @@ compute_gradient_Beta <- function(X_list, L_list, q, indices_list, XtX_list, XtY
     .Call(`_MultiLORS_compute_gradient_Beta`, X_list, L_list, q, indices_list, XtX_list, XtY_list, Beta_old)
 }
 
+update_Beta <- function(Y_list, X_list, L_list, q, indices_list, XtX_list, XtY_list, Beta_old, lambda, s_Beta, s) {
+    .Call(`_MultiLORS_update_Beta`, Y_list, X_list, L_list, q, indices_list, XtX_list, XtY_list, Beta_old, lambda, s_Beta, s)
+}
+
+compute_s_Beta <- function(XtX_list, p, q, dataset_indices_list) {
+    .Call(`_MultiLORS_compute_s_Beta`, XtX_list, p, q, dataset_indices_list)
+}
+
 evaluate_g <- function(Y_list, X_list, L_list, indices_list, Beta) {
     .Call(`_MultiLORS_evaluate_g`, Y_list, X_list, L_list, indices_list, Beta)
+}
+
+compute_error <- function(Y_list, X_list, indices_list, Beta) {
+    .Call(`_MultiLORS_compute_error`, Y_list, X_list, indices_list, Beta)
 }
 
 l1_penalty <- function(Beta, lambda) {
@@ -21,8 +33,8 @@ evaluate_objective <- function(Y_list, X_list, L_list, indices_list, Beta, lambd
     .Call(`_MultiLORS_evaluate_objective`, Y_list, X_list, L_list, indices_list, Beta, lambda, gamma, gamma_weights)
 }
 
-l1_prox <- function(matrix, lambda, intercept) {
-    .Call(`_MultiLORS_l1_prox`, matrix, lambda, intercept)
+l1_prox <- function(matrix, lambda) {
+    .Call(`_MultiLORS_l1_prox`, matrix, lambda)
 }
 
 nuclear_prox <- function(matrix, gamma) {

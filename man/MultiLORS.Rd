@@ -7,11 +7,10 @@
 MultiLORS(
   Y_list,
   X_list,
-  D_list,
+  indices_list,
   Y_list_validation = NULL,
   X_list_validation = NULL,
-  D_list_validation = NULL,
-  standardize = TRUE,
+  indices_list_validation = NULL,
   n_lambda = 20,
   n_gamma = 20,
   lambda_min_ratio = 0.001,
@@ -19,8 +18,8 @@ MultiLORS(
   n_iter = 1000,
   tolerance = 1e-06,
   early_stopping = TRUE,
-  line_search = TRUE,
-  verbose = FALSE
+  verbose = 0,
+  return_L = TRUE
 )
 }
 \arguments{
