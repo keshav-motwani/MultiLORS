@@ -53,7 +53,7 @@ fit_glmnet = function(Y_list,
       error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, Beta[, , lambda])
       avg_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, Beta[, , lambda])
       weighted_avg_R2 = compute_weighted_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, Beta[, , lambda])
-      R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, Beta)
+      R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, Beta[, , lambda])
 
       validation_error[lambda] = error
       avg_validation_R2[lambda] = avg_R2
