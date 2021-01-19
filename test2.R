@@ -36,4 +36,7 @@ fit_1 = fit_glmnet(prepared_train$Y_list, X_list[train_data], prepared_train$ind
 
 fit_2 = MultiLORS(prepared_train$Y_list, X_list[train_data], prepared_train$indices_list,
                   prepared_validation$Y_list, X_list[validation_data], prepared_validation$indices_list,
-                  verbose = 1, n_iter = 100, tolerance = 1e-6, n_lambda = 20, n_gamma = 20, early_stopping = TRUE)
+                  verbose = 1, n_iter = 100, tolerance = 1e-6, n_lambda = 20, n_gamma = 20, early_stopping = TRUE,
+                  return_L = FALSE)
+
+saveRDS(list(fit_1, fit_2), "test.rds")
