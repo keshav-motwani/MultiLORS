@@ -19,7 +19,8 @@ MultiLORS(
   tolerance = 1e-06,
   early_stopping = TRUE,
   verbose = 0,
-  return_L = TRUE
+  return_L = TRUE,
+  n_cores = 1
 )
 }
 \arguments{

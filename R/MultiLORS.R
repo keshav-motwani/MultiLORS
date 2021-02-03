@@ -16,6 +16,10 @@
 #' @param line_search
 #' @param verbose
 #'
+#' @importFrom foreach %dopar% foreach
+#' @importFrom parallel makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#'
 #' @return
 #' @export
 MultiLORS = function(Y_list,
@@ -32,7 +36,8 @@ MultiLORS = function(Y_list,
                      tolerance = 1e-6,
                      early_stopping = TRUE,
                      verbose = 0,
-                     return_L = TRUE) {
+                     return_L = TRUE,
+                     n_cores = 1) {
 
   X_list = standardize_X(X_list)
   X_mean = attributes(X_list)$mean
@@ -54,35 +59,42 @@ MultiLORS = function(Y_list,
 
   s_Beta = compute_s_Beta(XtX_list, p, q, dataset_indices_list)
 
-  result = lapply(1:n_gamma, function(gamma) {
-    fit_solution_path(Y_list,
-                      X_list,
-                      indices_list,
-                      Y_list_validation,
-                      X_list_validation,
-                      indices_list_validation,
-                      standardize,
-                      n_lambda,
-                      n_gamma,
-                      lambda_min_ratio,
-                      gamma_min_ratio,
-                      n_iter,
-                      tolerance,
-                      early_stopping,
-                      verbose,
-                      return_L,
-                      p,
-                      q,
-                      XtX_list,
-                      XtY_list,
-                      X_mean,
-                      X_sd,
-                      lambda_grid,
-                      gamma_sequence,
-                      gamma_weights,
-                      s_Beta,
-                      gamma)
-  })
+  # https://github.com/r-pkg-examples/rcpp-and-doparallel
+  cl = makeCluster(n_cores)
+  on.exit(stopCluster(cl))
+  registerDoParallel(cl)
+
+  result = foreach(gamma = 1:n_gamma) %dopar% {
+    fit_solution_path(
+      Y_list,
+      X_list,
+      indices_list,
+      Y_list_validation,
+      X_list_validation,
+      indices_list_validation,
+      standardize,
+      n_lambda,
+      n_gamma,
+      lambda_min_ratio,
+      gamma_min_ratio,
+      n_iter,
+      tolerance,
+      early_stopping,
+      verbose,
+      return_L,
+      p,
+      q,
+      XtX_list,
+      XtY_list,
+      X_mean,
+      X_sd,
+      lambda_grid,
+      gamma_sequence,
+      gamma_weights,
+      s_Beta,
+      gamma
+    )
+  }
 
   result = aggregate_tuning_results(result, n_lambda, n_gamma)
 

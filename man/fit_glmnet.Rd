@@ -11,7 +11,6 @@ fit_glmnet(
   Y_list_validation,
   X_list_validation,
   indices_list_validation,
-  standardize = TRUE,
   n_lambda = 20,
   lambda_min_ratio = 0.001
 )
