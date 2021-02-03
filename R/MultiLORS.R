@@ -39,10 +39,6 @@ MultiLORS = function(Y_list,
                      return_L = TRUE,
                      n_cores = 1) {
 
-  if (n_cores > 1) {
-    Sys.setenv(OMP_NUM_THREADS = 1)
-  }
-
   X_list = standardize_X(X_list)
   X_mean = attributes(X_list)$mean
   X_sd = attributes(X_list)$sd
@@ -64,7 +60,7 @@ MultiLORS = function(Y_list,
   s_Beta = compute_s_Beta(XtX_list, p, q, dataset_indices_list)
 
   # https://github.com/r-pkg-examples/rcpp-and-doparallel
-  cl = makeCluster(n_cores)
+  cl = makeCluster(n_cores, outfile="")
   on.exit(stopCluster(cl))
   registerDoParallel(cl)
 

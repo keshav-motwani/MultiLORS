@@ -29,4 +29,4 @@ E_test = simulate_E_list(n_k, Sigma)
 Y_test = compute_Y_list(X_test, Beta, L_test, E_test)
 indices_test = list(1:q, 1:q, 1:q)
 
-print(system.time({fit = MultiLORS(Y, X, indices, Y_val, X_val, indices_val, verbose = FALSE, n_iter = 100, n_cores = 4)}))
+print(system.time({fit = MultiLORS(Y, X, indices, Y_val, X_val, indices_val, verbose = 1, n_iter = 100, n_cores = 4)}))
