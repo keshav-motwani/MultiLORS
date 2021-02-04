@@ -59,7 +59,7 @@ fit = function(Y_list,
 
   }
 
-  if (verbose > 0) print(paste0("# of iterations: ", iter, "; difference = ", round((last_step - this_step)/last_step, 5)))
+  if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda, " --- # of iterations: ", iter, "; difference = ", round((last_step - this_step)/last_step, 5)))
 
   objective = objective[1:(2 * iter)]
 

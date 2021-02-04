@@ -16,10 +16,6 @@
 #' @param line_search
 #' @param verbose
 #'
-#' @importFrom foreach %dopar% foreach
-#' @importFrom parallel makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
-#'
 #' @return
 #' @export
 MultiLORS = function(Y_list,
@@ -59,12 +55,7 @@ MultiLORS = function(Y_list,
 
   s_Beta = compute_s_Beta(XtX_list, p, q, dataset_indices_list)
 
-  # https://github.com/r-pkg-examples/rcpp-and-doparallel
-  cl = makeCluster(n_cores, outfile="")
-  on.exit(stopCluster(cl))
-  registerDoParallel(cl)
-
-  result = foreach(gamma = 1:n_gamma) %dopar% {
+  model_fits = parallel::mclapply(1:n_gamma, function(gamma) {
     fit_solution_path(
       Y_list,
       X_list,
@@ -94,14 +85,22 @@ MultiLORS = function(Y_list,
       s_Beta,
       gamma
     )
+  }, mc.cores = n_cores
+  )
+
+  fit = list(model_fits = model_fits,
+             n_lambda = n_lambda,
+             n_gamma = n_gamma,
+             gamma_sequence = gamma_sequence,
+             lambda_grid = lambda_grid)
+
+  if (!is.null(X_list_validation)) {
+    validation = compute_validation_performance(fit, Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list)
   }
 
-  result = aggregate_tuning_results(result, n_lambda, n_gamma)
+  fit = c(fit, validation)
 
-  result$gamma_sequence = gamma_sequence
-  result$lambda_grid = lambda_grid
-
-  return(result)
+  return(fit)
 
 }
 
@@ -165,11 +164,10 @@ fit_solution_path = function(Y_list,
     model$gamma_index = gamma
 
     if (!is.null(Y_list_validation)) {
-      model$validation_error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, model$Beta)
-      model$avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
-      model$weighted_avg_validation_R2 = compute_weighted_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
-      model$R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
-      if (verbose > 0) print(paste0("Validation Error: ", model$validation_error, "; Avg Validation R2: ", round(model$avg_validation_R2, 4), "; Weighted Avg Validation R2: ", round(model$weighted_avg_validation_R2, 4)))
+      validation_error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, model$Beta)
+      avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
+      weighted_avg_validation_R2 = compute_weighted_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
+      if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda, " --- Validation Error: ", validation_error, "; Avg Validation R2: ", round(avg_validation_R2, 4), "; Weighted Avg Validation R2: ", round(weighted_avg_validation_R2, 4)))
     }
 
     Beta_old = model$Beta
@@ -177,19 +175,23 @@ fit_solution_path = function(Y_list,
 
     model$Beta = as(model$Beta, "dgCMatrix")
     colnames(model$Beta) = attr(indices_list, "responses")
+    if (!is.null(colnames(X_list[[1]]))) rownames(model$Beta) = c("intercept", colnames(X_list[[1]]))
 
     result = c(result, list(model))
 
     if (early_stopping && !is.null(Y_list_validation)) {
       if (lambda > 5 &&
           lambda > n_lambda / 4 &&
-          model$validation_error > result[[length(result) - 1]][["validation_error"]] &&
-          model$avg_validation_R2 < result[[length(result) - 1]][["avg_validation_R2"]] &&
-          model$weighted_avg_validation_R2 < result[[length(result) - 1]][["weighted_avg_validation_R2"]]) {
+          validation_error > past_validation_error &&
+          avg_validation_R2 < past_avg_validation_R2 &&
+          weighted_avg_validation_R2 < past_weighted_avg_validation_R2) {
         break
       }
     }
 
+    past_validation_error = validation_error
+    past_avg_validation_R2 = avg_validation_R2
+    past_weighted_avg_validation_R2 = weighted_avg_validation_R2
 
   }
 
