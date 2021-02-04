@@ -67,9 +67,6 @@ compute_SST = function(Y_list_test, indices_list_test, Y_list_train, indices_lis
 
   }
 
-  names(SST) = colnames(Beta)
-  names(counts) = colnames(Beta)
-
   attr(SST, "counts") = counts
 
   return(SST)
