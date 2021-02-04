@@ -42,12 +42,12 @@ select_genes = function(train_sce_list, all_sce_list, n_genes) {
 
 }
 
-genes = select_genes(datasets[train_data], datasets, 1000)
+genes = select_genes(hao_3_prime_split[train_data], hao_3_prime_split, 1000)
 
-X_list = lapply(datasets, function(x) t(as.matrix(logcounts(x)[genes, ])))
-Y_list = lapply(datasets, function(x) t(as.matrix(logcounts(altExp(x)))))
+X_list = lapply(hao_3_prime_split, function(x) t(as.matrix(logcounts(x)[genes, ])))
+Y_list = lapply(hao_3_prime_split, function(x) t(as.matrix(logcounts(altExp(x)))))
 
-rm(datasets)
+rm(hao_3_prime_split)
 gc()
 
 prepared_train = prepare_Y_and_indices_train(Y_list[train_data])
