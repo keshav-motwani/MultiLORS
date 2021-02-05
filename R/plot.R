@@ -37,10 +37,9 @@ plot_actual_vs_predicted = function(Y_list, X_list, indices_list, Beta, annotati
   if (!is.null(annotations)) {
     for (i in 1:length(annotations)) {
       if (is.null(names(annotations[[i]]))) names(annotations[[i]]) = colnames(Beta)
-      annotations[[i]] = round(annotations[[i]], 3)
     }
-    text = apply(do.call(cbind, lapply(names(annotations), function(x) paste0(" ", x, ": ", annotations[[x]]))), 1, function(y) paste(y, collapse = "\n"))
-    annotations = data.frame(text = text, feature = names(annotations[[1]]))
+    text = apply(do.call(cbind, lapply(names(annotations), function(x) paste0(" ", x, ": ", round(annotations[[x]], 3)))), 1, function(y) paste(y, collapse = "\n"))
+    annotation_data = data.frame(text = text, response = names(annotations[[1]]))
   }
 
   predicted = mapply(X_list, indices_list, FUN = function(x, y) {
@@ -50,16 +49,22 @@ plot_actual_vs_predicted = function(Y_list, X_list, indices_list, Beta, annotati
   }, SIMPLIFY = FALSE)
 
   plot_data = do.call(rbind, mapply(Y_list, predicted, names(Y_list), FUN = function(true, pred, name) {
-    data = do.call(rbind, lapply(colnames(true), function(x) data.frame(true = true[, x], pred = pred[, x], feature = x)))
+    data = do.call(rbind, lapply(colnames(true), function(x) data.frame(true = true[, x], pred = pred[, x], response = x)))
     data$dataset = name
     data
   }, SIMPLIFY = FALSE))
 
-  plot = ggplot(plot_data, aes(x = true, y = pred, color = dataset)) + geom_point(size = 0.25, alpha = 0.5) + facet_wrap(~feature, scales = "free") + theme_classic() +
+  if (!is.null(annotations)) {
+    levels = names(annotations[[1]])[order(annotations[[1]], decreasing = TRUE)]
+    plot_data$response = factor(plot_data$response, levels = levels)
+    annotation_data$response = factor(annotation_data$response, levels = levels)
+  }
+
+  plot = ggplot(plot_data, aes(x = true, y = pred, color = dataset)) + geom_point(size = 0.25, alpha = 0.5) + facet_wrap(~response, scales = "free") + theme_classic() +
     theme(strip.background = element_blank(), strip.placement = "outside") + labs(x = "actual", y = "predicted")
 
   if (!is.null(annotations)) {
-    plot = plot + geom_text(data = annotations, aes(x = -Inf, y = Inf, label = text, vjust = 1, hjust = 0), inherit.aes = FALSE, parse = FALSE, size = 3)
+    plot = plot + geom_text(data = annotation_data, aes(x = -Inf, y = Inf, label = text, vjust = 1, hjust = 0), inherit.aes = FALSE, parse = FALSE, size = 3)
   }
 
   return(plot)
