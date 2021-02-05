@@ -11,7 +11,7 @@
 #'
 #' @return
 #' @export
-plot_actual_vs_predicted = function(Y_list, X_list, indices_list, Beta, annotations = NULL) {
+plot_actual_vs_predicted = function(Y_list, X_list, indices_list, Beta, annotations = NULL, order = FALSE) {
 
   if (ncol(X_list[[1]]) + 1 == nrow(Beta)) {
     X_list = lapply(X_list, function(x) cbind(1, x))
@@ -55,7 +55,7 @@ plot_actual_vs_predicted = function(Y_list, X_list, indices_list, Beta, annotati
     data
   }, SIMPLIFY = FALSE))
 
-  if (!is.null(annotations)) {
+  if (order & !is.null(annotations)) {
     levels = names(annotations[[1]])[order(annotations[[1]], decreasing = TRUE)]
     plot_data$response = factor(plot_data$response, levels = levels)
     annotation_data$response = factor(annotation_data$response, levels = levels)
