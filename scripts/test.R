@@ -29,7 +29,7 @@ E_test = simulate_E_list(n_k, Sigma)
 Y_test = compute_Y_list(X_test, Beta, L_test, E_test)
 indices_test = list(1:q, 1:q, 1:q)
 
-print(system.time({MultiLORS_fit = MultiLORS(Y, X, indices, Y_val, X_val, indices_val, verbose = 0, n_iter = 100, n_cores = 4)}))
+print(system.time({MultiLORS_fit = MultiLORS(Y, X, indices, Y_val, X_val, indices_val, verbose = 0, n_iter = 100, n_cores = 1)}))
 
 glmnet_fit = fit_glmnet(Y, X, indices, Y_val, X_val, indices_val)
 
@@ -48,6 +48,6 @@ compute_avg_R2(Y_test, X_test, indices_test, Y, indices, Beta_hat)
 compute_weighted_avg_R2(Y_test, X_test, indices_test, Y, indices, Beta_hat)
 compute_avg_correlation(Y_test, X_test, indices_test, Beta_hat)
 
-annotations = list("rho" = compute_correlation(Y_test, X_test, indices_test, Beta_hat),
-                   "R^2" = compute_R2(Y_test, X_test, indices_test, Y, indices, Beta_hat))
+annotations = list("R2" = compute_R2(Y_test, X_test, indices_test, Y, indices, Beta_hat),
+                   "rho" = compute_correlation(Y_test, X_test, indices_test, Beta_hat))
 plot_actual_vs_predicted(Y_test, X_test, indices_test, Beta_hat, annotations)
