@@ -55,7 +55,7 @@ plot_actual_vs_predicted = function(Y_list, X_list, indices_list, Beta, annotati
     data
   }, SIMPLIFY = FALSE))
 
-  plot = ggplot(plot_data, aes(x = true, y = pred, color = dataset)) + geom_point(size = 0.25, alpha = 0.5) + facet_wrap(~feature) + theme_classic() +
+  plot = ggplot(plot_data, aes(x = true, y = pred, color = dataset)) + geom_point(size = 0.25, alpha = 0.5) + facet_wrap(~feature, scales = "free") + theme_classic() +
     theme(strip.background = element_blank(), strip.placement = "outside") + labs(x = "actual", y = "predicted")
 
   if (!is.null(annotations)) {
