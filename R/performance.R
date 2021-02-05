@@ -162,11 +162,17 @@ compute_correlation = function(Y_list, X_list, indices_list, Beta) {
 
     pred = X_list[[k]] %*% Beta[, indices_list[[k]]]
 
-    corr[k, indices_list[[k]]] = diag(cor(Y_list[[k]], pred))
+    for (i in indices_list[[k]]) {
+
+      correlation = cor(Y_list[[k]][, i], pred[, i])
+
+      corr[k, i] = ifelse(is.na(correlation), 0, correlation)
+
+    }
 
   }
 
-  result = colMeans(corr)
+  result = colMeans(corr, na.rm = TRUE)
 
   names(result) = colnames(Beta)
 
