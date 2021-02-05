@@ -1,7 +1,6 @@
 library(MultiLORS)
 
 set.seed(1)
-future::plan("multisession", workers = 4)
 
 n_k = rep(500, 3)
 p = 50
