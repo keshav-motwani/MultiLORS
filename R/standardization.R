@@ -8,6 +8,7 @@ standardize_X = function(X_list) {
 
   X = X - tcrossprod(rep(1, nrow(X)), means)
   X = X %*% diag(1 / sqrt(vars))
+  colnames(X) = colnames(X_list[[1]])
 
   X_list = lapply(1:length(X_list), function(i) X[k == i, ])
 
