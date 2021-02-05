@@ -167,6 +167,8 @@ fit_solution_path = function(Y_list,
       validation_error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, model$Beta)
       avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
       weighted_avg_validation_R2 = compute_weighted_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
+      model$validation_R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
+      model$validation_correlation  = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, model$Beta)
       if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda, " --- Validation Error: ", validation_error, "; Avg Validation R2: ", round(avg_validation_R2, 4), "; Weighted Avg Validation R2: ", round(weighted_avg_validation_R2, 4)))
     }
 

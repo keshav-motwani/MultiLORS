@@ -40,6 +40,7 @@ fit_glmnet = function(Y_list,
   validation_error = numeric(n_lambda)
   avg_validation_R2 = numeric(n_lambda)
   weighted_avg_validation_R2 = numeric(n_lambda)
+  avg_validation_correlation = numeric(n_lambda)
 
   models = list()
 
@@ -47,22 +48,25 @@ fit_glmnet = function(Y_list,
 
     fit = list(Beta = as(Beta[, , lambda], "dgCMatrix"))
     colnames(fit$Beta) = attr(indices_list, "responses")
+    if (!is.null(colnames(X_list[[1]]))) rownames(fit$Beta) = c("intercept", colnames(X_list[[1]]))
 
     if (!is.null(Y_list_validation)) {
 
-      error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, Beta[, , lambda])
-      avg_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, Beta[, , lambda])
-      weighted_avg_R2 = compute_weighted_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, Beta[, , lambda])
-      R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, Beta[, , lambda])
+      error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, as.matrix(fit$Beta))
+      avg_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, as.matrix(fit$Beta))
+      weighted_avg_R2 = compute_weighted_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, as.matrix(fit$Beta))
+      avg_correlation = compute_avg_correlation(Y_list_validation, X_list_validation, indices_list_validation, as.matrix(fit$Beta))
 
       validation_error[lambda] = error
       avg_validation_R2[lambda] = avg_R2
       weighted_avg_validation_R2[lambda] = weighted_avg_R2
+      avg_validation_correlation[lambda] = avg_correlation
 
-      fit$validation_error = error
-      fit$avg_validation_R2 = avg_R2
-      fit$weighted_avg_validation_R2 = weighted_avg_R2
-      fit$R2 = R2
+      R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, as.matrix(fit$Beta))
+      correlation = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, as.matrix(fit$Beta))
+
+      fit$validation_R2 = R2
+      fit$validation_correlation = correlation
 
     }
 
