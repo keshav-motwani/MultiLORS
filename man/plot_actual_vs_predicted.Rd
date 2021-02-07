@@ -9,7 +9,8 @@ plot_actual_vs_predicted(
   X_list,
   indices_list,
   Beta,
-  annotations = NULL
+  annotations = NULL,
+  order = FALSE
 )
 }
 \arguments{
