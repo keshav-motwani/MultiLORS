@@ -7,7 +7,6 @@
 #' @param annotations
 #'
 #' @import ggplot2
-#' @importFrom scattermore geom_scattermore
 #'
 #' @return
 #' @export
@@ -61,7 +60,7 @@ plot_actual_vs_predicted = function(Y_list, X_list, indices_list, Beta, annotati
     annotation_data$response = factor(annotation_data$response, levels = levels)
   }
 
-  plot = ggplot(plot_data, aes(x = true, y = pred, color = dataset)) + geom_scattermore(size = 5, alpha = 0.5) + facet_wrap(~response, scales = "free") + theme_classic() +
+  plot = ggplot(plot_data, aes(x = true, y = pred, color = dataset)) + geom_point(size = 0.25) + facet_wrap(~response, scales = "free") + theme_classic() +
     theme(strip.background = element_blank(), strip.placement = "outside") + labs(x = "actual", y = "predicted")
 
   if (!is.null(annotations)) {
