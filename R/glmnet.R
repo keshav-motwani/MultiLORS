@@ -20,9 +20,6 @@ fit_glmnet = function(Y_list,
 
   p = ncol(X_list[[1]])
   q = max(unlist(indices_list))
-  if (!is.null(X_list_validation)) {
-    X_list_validation = lapply(X_list_validation, function(k) cbind(1, k))
-  }
 
   lambda_sequence = compute_candidate_lambda_sequence_glmnet(Y_list, standardize_X(X_list), q, indices_list, n_lambda, lambda_min_ratio)
 
@@ -37,36 +34,56 @@ fit_glmnet = function(Y_list,
 
   }
 
-  validation_error = numeric(n_lambda)
+  X_list = lapply(X_list, function(k) cbind(1, k))
+  if (!is.null(X_list_validation)) {
+    X_list_validation = lapply(X_list_validation, function(k) cbind(1, k))
+  }
+
+  train_SSE = numeric(n_lambda)
+  avg_train_R2 = numeric(n_lambda)
+  avg_train_correlation = numeric(n_lambda)
+
+  validation_SSE = numeric(n_lambda)
   avg_validation_R2 = numeric(n_lambda)
-  weighted_avg_validation_R2 = numeric(n_lambda)
   avg_validation_correlation = numeric(n_lambda)
 
   models = list()
 
   for (lambda in 1:n_lambda) {
 
-    fit = list(Beta = as(Beta[, , lambda], "dgCMatrix"))
+    fit = list(Beta = as(Beta[, , lambda], "dgCMatrix"), performance = list(train = list(), validation = list()))
     colnames(fit$Beta) = attr(indices_list, "responses")
     if (!is.null(colnames(X_list[[1]]))) rownames(fit$Beta) = c("intercept", colnames(X_list[[1]]))
 
+    R2 = compute_R2(Y_list, X_list, indices_list, Y_list, indices_list, fit$Beta)
+    correlation = compute_correlation(Y_list, X_list, indices_list, fit$Beta)
+
+    fit$performance$train$R2 = R2
+    fit$performance$train$correlation = correlation
+
+    error = compute_error(Y_list, X_list, indices_list, as.matrix(fit$Beta))
+    avg_R2 = compute_avg_R2(Y_list, X_list, indices_list, Y_list, indices_list, fit$Beta)
+    avg_correlation = compute_avg_correlation(Y_list, X_list, indices_list, fit$Beta)
+
+    train_SSE[lambda] = error
+    avg_train_R2[lambda] = avg_R2
+    avg_train_correlation[lambda] = avg_correlation
+
     if (!is.null(Y_list_validation)) {
 
+      R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, fit$Beta)
+      correlation = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, fit$Beta)
+
+      fit$performance$validation$R2 = R2
+      fit$performance$validation$correlation = correlation
+
       error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, as.matrix(fit$Beta))
-      avg_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, as.matrix(fit$Beta))
-      weighted_avg_R2 = compute_weighted_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, as.matrix(fit$Beta))
-      avg_correlation = compute_avg_correlation(Y_list_validation, X_list_validation, indices_list_validation, as.matrix(fit$Beta))
+      avg_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, fit$Beta)
+      avg_correlation = compute_avg_correlation(Y_list_validation, X_list_validation, indices_list_validation, fit$Beta)
 
-      validation_error[lambda] = error
+      validation_SSE[lambda] = error
       avg_validation_R2[lambda] = avg_R2
-      weighted_avg_validation_R2[lambda] = weighted_avg_R2
       avg_validation_correlation[lambda] = avg_correlation
-
-      R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, as.matrix(fit$Beta))
-      correlation = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, as.matrix(fit$Beta))
-
-      fit$validation_R2 = R2
-      fit$validation_correlation = correlation
 
     }
 
@@ -74,11 +91,13 @@ fit_glmnet = function(Y_list,
 
   }
 
+  tuning = list(train = list(SSE = train_SSE, avg_R2 = avg_train_R2, avg_correlation = avg_train_correlation),
+                validation = list(SSE = validation_SSE, avg_R2 = avg_validation_R2, avg_correlation = avg_validation_correlation))
+
   return(list(model_fits = models,
-              validation_error = validation_error,
-              avg_validation_R2 = avg_validation_R2,
-              weighted_avg_validation_R2 = weighted_avg_validation_R2,
-              lambda_sequence = lambda_sequence))
+              tuning = tuning,
+              lambda_sequence = lambda_sequence,
+              n_lambda = n_lambda))
 
 }
 

@@ -1,3 +1,56 @@
+#' Compute tuning performance on training/validation data
+#'
+#' @param fit
+#' @param Y_list
+#' @param X_list
+#' @param indices_list
+#' @param Y_list_train
+#' @param indices_list_train
+#'
+#' @return
+#' @export
+compute_tuning_performance = function(fit, Y_list, X_list, indices_list, Y_list_train, indices_list_train) {
+
+  n_gamma = fit$n_gamma
+  n_lambda = fit$n_lambda
+
+  p = nrow(fit[[1]][[1]]$Beta)
+  q = ncol(fit[[1]][[1]]$Beta)
+
+  if (ncol(X_list[[1]]) + 1 == nrow(fit$model_fits[[1]][[1]]$Beta)) {
+    X_list = lapply(X_list, function(x) cbind(1, x))
+  }
+
+  n_iter = matrix(NA, ncol = n_lambda, nrow = n_gamma)
+  SSE = matrix(NA, ncol = n_lambda, nrow = n_gamma)
+  avg_R2 = matrix(NA, ncol = n_lambda, nrow = n_gamma)
+  avg_correlation = matrix(NA, ncol = n_lambda, nrow = n_gamma)
+
+  for (solution_path in fit$model_fits) {
+
+    for (model in solution_path) {
+
+      lambda = model$lambda_index
+      gamma = model$gamma_index
+
+      Beta = as.matrix(model$Beta)
+
+      n_iter[gamma, lambda] = model$n_iter
+      SSE[gamma, lambda] = compute_error(Y_list, X_list, indices_list, Beta)
+      avg_R2[gamma, lambda] = compute_avg_R2(Y_list, X_list, indices_list, Y_list_train, indices_list_train, Beta)
+      avg_correlation[gamma, lambda] = compute_avg_correlation(Y_list, X_list, indices_list, Beta)
+
+    }
+
+  }
+
+  return(list(n_iter = n_iter,
+              SSE = SSE,
+              avg_R2 = avg_R2,
+              avg_correlation = avg_correlation))
+
+}
+
 compute_gamma_weights = function(Y_list) {
 
   weights = sapply(Y_list, function(k) irlba::irlba(k, nv = 1)$d)

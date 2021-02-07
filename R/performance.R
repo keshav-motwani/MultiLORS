@@ -45,13 +45,10 @@ compute_SST = function(Y_list_test, indices_list_test, Y_list_train, indices_lis
   q = max(unlist(indices_list_train))
 
   Y_train_means = numeric(q)
-  counts = numeric(q)
 
   for (i in 1:q) {
 
     Y = subset_observed_data_univariate(Y_list_train, NULL, indices_list_train, i)$Y
-
-    counts[i] = length(Y)
 
     Y_train_means[i] = mean(Y)
 
@@ -66,8 +63,6 @@ compute_SST = function(Y_list_test, indices_list_test, Y_list_train, indices_lis
     SST[indices_list_test[[k]]] = SST[indices_list_test[[k]]] + colSums((Y_list_test[[k]] - preds) ^ 2)
 
   }
-
-  attr(SST, "counts") = counts
 
   return(SST)
 
@@ -110,30 +105,6 @@ compute_avg_R2 = function(Y_list_test, X_list_test, indices_list_test, Y_list_tr
   SSE = compute_SSE(Y_list_test, X_list_test, indices_list_test, Beta)
 
   return(mean(1 - SSE/SST, na.rm = TRUE))
-
-}
-
-#' Compute weighted average R2 across all responses with weights based on number of observations
-#'
-#' @param Y_list_test
-#' @param X_list_test
-#' @param indices_list_test
-#' @param Y_list_train
-#' @param indices_list_train
-#' @param Beta
-#'
-#' @return
-#' @export
-compute_weighted_avg_R2 = function(Y_list_test, X_list_test, indices_list_test, Y_list_train, indices_list_train, Beta) {
-
-  SST = compute_SST(Y_list_test, indices_list_test, Y_list_train, indices_list_train)
-  SSE = compute_SSE(Y_list_test, X_list_test, indices_list_test, Beta)
-
-  counts = attr(SST, "counts")
-  counts[SST == 0] = 0
-  weights = counts/sum(counts)
-
-  return(sum(weights * (1 - SSE/SST), na.rm = TRUE))
 
 }
 

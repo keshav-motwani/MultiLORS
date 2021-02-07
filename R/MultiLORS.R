@@ -94,11 +94,15 @@ MultiLORS = function(Y_list,
              gamma_sequence = gamma_sequence,
              lambda_grid = lambda_grid)
 
+  train = compute_tuning_performance(fit, Y_list, X_list, indices_list, Y_list, indices_list)
+
   if (!is.null(X_list_validation)) {
-    validation = compute_validation_performance(fit, Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list)
+    validation = compute_tuning_performance(fit, Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list)
+  } else {
+    validation = NULL
   }
 
-  fit = c(fit, validation)
+  fit = c(fit, list(tuning = list(train = train, validation = validation)))
 
   return(fit)
 
@@ -163,13 +167,17 @@ fit_solution_path = function(Y_list,
     model$lambda_index = lambda
     model$gamma_index = gamma
 
+    model$performance = list(train = list(), validation = list())
+
+    model$performance$train$R2 = compute_R2(Y_list, X_list, indices_list, Y_list, indices_list, model$Beta)
+    model$performance$train$correlation = compute_correlation(Y_list, X_list, indices_list, model$Beta)
+
     if (!is.null(Y_list_validation)) {
       validation_error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, model$Beta)
       avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
-      weighted_avg_validation_R2 = compute_weighted_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
-      model$validation_R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
-      model$validation_correlation  = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, model$Beta)
-      if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda, " --- Validation Error: ", validation_error, "; Avg Validation R2: ", round(avg_validation_R2, 4), "; Weighted Avg Validation R2: ", round(weighted_avg_validation_R2, 4)))
+      model$performance$validation$R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
+      model$performance$validation$correlation  = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, model$Beta)
+      if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda, " --- Validation Error: ", validation_error, "; Avg Validation R2: ", round(avg_validation_R2, 4)))
     }
 
     Beta_old = model$Beta
@@ -185,15 +193,13 @@ fit_solution_path = function(Y_list,
       if (lambda > 5 &&
           lambda > n_lambda / 4 &&
           validation_error > past_validation_error &&
-          avg_validation_R2 < past_avg_validation_R2 &&
-          weighted_avg_validation_R2 < past_weighted_avg_validation_R2) {
+          avg_validation_R2 < past_avg_validation_R2) {
         break
       }
     }
 
     past_validation_error = validation_error
     past_avg_validation_R2 = avg_validation_R2
-    past_weighted_avg_validation_R2 = weighted_avg_validation_R2
 
   }
 
