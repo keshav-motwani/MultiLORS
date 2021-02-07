@@ -1,6 +1,10 @@
 library(MultiLORS)
 library(CITEseqData)
 library(SingleCellExperiment)
+library(ggplot2)
+
+result_path = "results/applications/hao_3_prime/"
+dir.create(result_path, recursive = TRUE)
 
 hao_3_prime_data = CITEseqData::get_hao_3_prime_data("../CITEseqData/data")
 
@@ -54,14 +58,16 @@ prepared_train = prepare_Y_and_indices_train(Y_list[train_data])
 prepared_validation = prepare_Y_and_indices_test(Y_list[validation_data], prepared_train$indices_list)
 prepared_test = prepare_Y_and_indices_test(Y_list[test_data], prepared_train$indices_list)
 
-fit_2 = MultiLORS(prepared_train$Y_list, X_list[train_data], prepared_train$indices_list,
+save.image(file = file.path(result_path, "data.RData"))
+
+MultiLORS_fit = MultiLORS(prepared_train$Y_list, X_list[train_data], prepared_train$indices_list,
                   prepared_validation$Y_list, X_list[validation_data], prepared_validation$indices_list,
                   verbose = 1, n_iter = 500, tolerance = 1e-6, n_lambda = 20, n_gamma = 20, early_stopping = TRUE,
                   return_L = FALSE, n_cores = 20)
 
-saveRDS(fit_2, "hao_3_prime_MultiLORS_fit.rds")
+saveRDS(MultiLORS_fit, file.path(result_path, "MultiLORS_fit.rds"))
 
-fit_1 = fit_glmnet(prepared_train$Y_list, X_list[train_data], prepared_train$indices_list,
+glmnet_fit = fit_glmnet(prepared_train$Y_list, X_list[train_data], prepared_train$indices_list,
                    prepared_validation$Y_list, X_list[validation_data], prepared_validation$indices_list)
 
-saveRDS(fit_1, "hao_3_prime_glmnet_fit.rds")
+saveRDS(glmnet_fit, file.path(result_path, "glmnet_fit.rds"))
