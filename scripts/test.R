@@ -33,21 +33,27 @@ print(system.time({MultiLORS_fit = MultiLORS(Y, X, indices, Y_val, X_val, indice
 
 glmnet_fit = fit_glmnet(Y, X, indices, Y_val, X_val, indices_val)
 
-best_indices_MultiLORS = which_min(MultiLORS_fit$validation_error)
-best_index_glmnet = which_min(glmnet_fit$validation_error)
+best_indices_MultiLORS = which_min(MultiLORS_fit$tuning$validation$SSE)
+best_index_glmnet = which_min(glmnet_fit$tuning$validation$SSE)
 sum((Beta - as.matrix(MultiLORS_fit$model_fits[[best_indices_MultiLORS[1]]][[best_indices_MultiLORS[2]]]$Beta)) ^ 2)
 sum((Beta - as.matrix(glmnet_fit$model_fits[[best_index_glmnet]]$Beta)) ^ 2)
 
-Beta_hat = MultiLORS_fit$model_fits[[best_indices_MultiLORS[1]]][[best_indices_MultiLORS[2]]]$Beta
+MultiLORS_Beta_hat = MultiLORS_fit$model_fits[[best_indices_MultiLORS[1]]][[best_indices_MultiLORS[2]]]$Beta
+glmnet_Beta_hat = glmnet_fit$model_fits[[best_index_glmnet]]$Beta
 
-compute_correlation(Y_test, X_test, indices_test, Beta_hat)
-compute_R2(Y_test, X_test, indices_test, Y, indices, Beta_hat)
-compute_SSE(Y_test, X_test, indices_test, Beta_hat)
+compute_correlation(Y_test, X_test, indices_test, MultiLORS_Beta_hat)
+compute_R2(Y_test, X_test, indices_test, Y, indices, MultiLORS_Beta_hat)
+compute_SSE(Y_test, X_test, indices_test, MultiLORS_Beta_hat)
 
-compute_avg_R2(Y_test, X_test, indices_test, Y, indices, Beta_hat)
-compute_weighted_avg_R2(Y_test, X_test, indices_test, Y, indices, Beta_hat)
-compute_avg_correlation(Y_test, X_test, indices_test, Beta_hat)
+compute_avg_R2(Y_test, X_test, indices_test, Y, indices, MultiLORS_Beta_hat)
+compute_avg_R2(Y_test, X_test, indices_test, Y, indices, glmnet_Beta_hat)
+compute_avg_correlation(Y_test, X_test, indices_test, MultiLORS_Beta_hat)
+compute_avg_correlation(Y_test, X_test, indices_test, glmnet_Beta_hat)
 
-annotations = list("R2" = compute_R2(Y_test, X_test, indices_test, Y, indices, Beta_hat),
-                   "rho" = compute_correlation(Y_test, X_test, indices_test, Beta_hat))
-plot_actual_vs_predicted(Y_test, X_test, indices_test, Beta_hat, annotations)
+MultiLORS_performance = list("R2" = compute_R2(Y_test, X_test, indices_test, Y, indices, MultiLORS_Beta_hat),
+                             "rho" = compute_correlation(Y_test, X_test, indices_test, MultiLORS_Beta_hat))
+plot_actual_vs_predicted(Y_test, X_test, indices_test, MultiLORS_Beta_hat, MultiLORS_performance)
+
+glmnet_performance = list("R2" = compute_R2(Y_test, X_test, indices_test, Y, indices, glmnet_Beta_hat),
+                             "rho" = compute_correlation(Y_test, X_test, indices_test, glmnet_Beta_hat))
+plot_actual_vs_predicted(Y_test, X_test, indices_test, glmnet_Beta_hat, glmnet_performance)
