@@ -185,7 +185,7 @@ fit_solution_path = function(Y_list,
 
     model$Beta = as(model$Beta, "dgCMatrix")
     colnames(model$Beta) = attr(indices_list, "responses")
-    if (!is.null(colnames(X_list[[1]]))) rownames(model$Beta) = c("intercept", colnames(X_list[[1]]))
+    if (!is.null(colnames(X_list[[1]]))) rownames(model$Beta) = colnames(X_list[[1]])
 
     result = c(result, list(model))
 

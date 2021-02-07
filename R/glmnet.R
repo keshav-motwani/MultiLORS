@@ -53,7 +53,7 @@ fit_glmnet = function(Y_list,
 
     fit = list(Beta = as(Beta[, , lambda], "dgCMatrix"), performance = list(train = list(), validation = list()))
     colnames(fit$Beta) = attr(indices_list, "responses")
-    if (!is.null(colnames(X_list[[1]]))) rownames(fit$Beta) = c("intercept", colnames(X_list[[1]]))
+    if (!is.null(colnames(X_list[[1]]))) rownames(fit$Beta) = colnames(X_list[[1]])
 
     R2 = compute_R2(Y_list, X_list, indices_list, Y_list, indices_list, fit$Beta)
     correlation = compute_correlation(Y_list, X_list, indices_list, fit$Beta)
