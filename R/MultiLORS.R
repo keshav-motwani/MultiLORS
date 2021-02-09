@@ -141,6 +141,9 @@ fit_solution_path = function(Y_list,
 
   Beta_old = matrix(0, nrow = p, ncol = q)
 
+  min_validation_error = Inf
+  max_avg_validation_R2 = 0
+
   for (lambda in 1:n_lambda) {
 
     if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda))
@@ -176,6 +179,8 @@ fit_solution_path = function(Y_list,
     if (!is.null(Y_list_validation)) {
       validation_error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, model$Beta)
       avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
+      min_validation_error = min(min_validation_error, validation_error)
+      max_avg_validation_R2 = max(max_avg_validation_R2, avg_validation_R2)
       model$performance$validation$R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
       model$performance$validation$correlation  = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, model$Beta)
       if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda, " --- Validation Error: ", validation_error, "; Avg Validation R2: ", round(avg_validation_R2, 4)))
@@ -193,14 +198,11 @@ fit_solution_path = function(Y_list,
     if (early_stopping && !is.null(Y_list_validation)) {
       if (lambda > 5 &&
           lambda > n_lambda / 4 &&
-          validation_error > past_validation_error &&
-          avg_validation_R2 < past_avg_validation_R2) {
+          validation_error > min_validation_error * 1.01 &&
+          avg_validation_R2 < max_avg_validation_R2 * 0.99) {
         break
       }
     }
-
-    past_validation_error = validation_error
-    past_avg_validation_R2 = avg_validation_R2
 
   }
 

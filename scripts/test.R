@@ -29,6 +29,8 @@ E_test = simulate_E_list(n_k, Sigma)
 Y_test = compute_Y_list(X_test, Beta, L_test, E_test)
 indices_test = list(1:q, 1:q, 1:q)
 
+print(system.time({MultiLORS_fit = MultiLORS(Y, X, indices, verbose = 0, n_iter = 100, n_cores = 4)}))
+
 print(system.time({MultiLORS_fit = MultiLORS(Y, X, indices, Y_val, X_val, indices_val, verbose = 0, n_iter = 100, n_cores = 4)}))
 
 glmnet_fit = fit_glmnet(Y, X, indices, Y_val, X_val, indices_val)
