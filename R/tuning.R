@@ -53,7 +53,7 @@ compute_tuning_performance = function(fit, Y_list, X_list, indices_list, Y_list_
 
 compute_gamma_weights = function(Y_list) {
 
-  weights = sapply(Y_list, function(k) svd(k, nv = 1)$d)
+  weights = sapply(Y_list, function(k) svd(k)$d[1])
 
   return(weights)
 
