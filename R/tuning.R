@@ -53,6 +53,8 @@ compute_tuning_performance = function(fit, Y_list, X_list, indices_list, Y_list_
 
 compute_gamma_weights = function(Y_list) {
 
+  set.seed(1)
+
   weights = sapply(Y_list, function(k) irlba::irlba(k, nv = 1)$d)
 
   return(weights)

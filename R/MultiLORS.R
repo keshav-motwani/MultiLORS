@@ -92,6 +92,7 @@ MultiLORS = function(Y_list,
              n_lambda = n_lambda,
              n_gamma = n_gamma,
              gamma_sequence = gamma_sequence,
+             gamma_weights = gamma_weights,
              lambda_grid = lambda_grid)
 
   train = compute_tuning_performance(fit, Y_list, X_list, indices_list, Y_list, indices_list)
