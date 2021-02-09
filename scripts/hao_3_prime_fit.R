@@ -54,6 +54,7 @@ if (!file.exists(data_file)) {
 
   X_list = lapply(hao_3_prime_split, function(x) t(as.matrix(logcounts(x)[genes, ])))
   Y_list = lapply(hao_3_prime_split, function(x) t(as.matrix(logcounts(altExp(x)))))
+  metadata_list = lapply(hao_3_prime_split, function(x) as.data.frame(colData(x)))
 
   rm(hao_3_prime_split)
   gc()
