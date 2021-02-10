@@ -23,7 +23,7 @@ adjust_Beta = function(Beta, X_mean, X_sd) {
 
   if (!is.null(X_mean)) {
 
-    Beta[1, ] = Beta[1, ] - colSums(diag(X_mean / X_sd) %*% Beta[-1, ])
+    Beta[1, ] = Beta[1, ] - crossprod(X_mean / X_sd, Beta[-1, ])
 
     Beta[-1, ] = diag(1 / X_sd) %*% Beta[-1, ]
 
@@ -43,7 +43,7 @@ adjust_Beta = function(Beta, X_mean, X_sd) {
   # model = glmnet(Xs, Y, family = "mgaussian", standardize = FALSE)
   # Beta1 = aperm(simplify2array(lapply(coef(model), as.matrix)), c(2, 1, 3))[3, , ]
   #
-  # Beta1[1, ] = Beta1[1, ] - colSums(diag(X_mean / X_sd) %*% Beta1[-1, ])
+  # Beta1[1, ] = Beta1[1, ] - v
   #
   # Beta1[-1, ] = diag(1 / X_sd) %*% Beta1[-1, ]
   # head(Beta1)
