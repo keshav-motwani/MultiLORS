@@ -175,20 +175,22 @@ fit_solution_path = function(Y_list,
     model$performance$train$R2 = compute_R2(Y_list, X_list, indices_list, Y_list, indices_list, model$Beta)
     model$performance$train$correlation = compute_correlation(Y_list, X_list, indices_list, model$Beta)
 
+    adjusted_Beta = adjust_Beta(model$Beta, X_mean, X_sd)
+
     if (!is.null(Y_list_validation)) {
-      validation_error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, model$Beta)
-      avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
+      validation_error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, adjusted_Beta)
+      avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, adjusted_Beta)
       min_validation_error = min(min_validation_error, validation_error)
       max_avg_validation_R2 = max(max_avg_validation_R2, avg_validation_R2)
-      model$performance$validation$R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, model$Beta)
-      model$performance$validation$correlation  = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, model$Beta)
+      model$performance$validation$R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, adjusted_Beta)
+      model$performance$validation$correlation  = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, adjusted_Beta)
       if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda, " --- Validation Error: ", validation_error, "; Avg Validation R2: ", round(avg_validation_R2, 4)))
     }
 
     Beta_old = model$Beta
     L_list_old = model$L_list
 
-    model$Beta = as(adjust_Beta(model$Beta, X_mean, X_sd), "dgCMatrix")
+    model$Beta = as(adjusted_Beta, "dgCMatrix")
     colnames(model$Beta) = attr(indices_list, "responses")
     if (!is.null(colnames(X_list[[1]]))) rownames(model$Beta) = colnames(X_list[[1]])
 

@@ -99,8 +99,6 @@ compute_candidate_lambda_sequence_fixed_gamma = function(Y_list, X_list, q, indi
 
 compute_candidate_lambda_sequence_glmnet = function(Y_list, X_list, q, indices_list, n_lambda, min_ratio) {
 
-  X_list = lapply(X_list, function(x) cbind(1, x))
-
   result = matrix(0, nrow = ncol(X_list[[1]]), ncol = q)
 
   for (k in 1:length(Y_list)) {
