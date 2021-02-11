@@ -4,7 +4,7 @@
 \alias{simulate_X}
 \title{simulate X matrix}
 \usage{
-simulate_X(n, p)
+simulate_X(n, p, mean = 0)
 }
 \arguments{
 \item{p}{}

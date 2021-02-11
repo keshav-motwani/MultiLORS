@@ -4,7 +4,7 @@
 \alias{simulate_X_list}
 \title{simulate list of X matrices}
 \usage{
-simulate_X_list(n_k, p)
+simulate_X_list(n_k, p, mean = 0)
 }
 \arguments{
 \item{p}{}

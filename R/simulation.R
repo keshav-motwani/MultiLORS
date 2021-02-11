@@ -117,7 +117,7 @@ simulate_Beta = function(p, q, sparsity, R2 = NULL, X = NULL, L = NULL, E = NULL
 #'
 #' @return
 #' @export
-simulate_X = function(n, p) {
+simulate_X = function(n, p, mean = 0) {
 
   Sigma = matrix(nrow = p, ncol = p)
 
@@ -131,6 +131,8 @@ simulate_X = function(n, p) {
 
   X = matrix(rnorm(n * nrow(Sigma)), nrow = n) %*% eo$vec %*% diag(eo$val^.5) %*% t(eo$vec)
 
+  X = X + mean
+
   return(X)
 
 }
@@ -142,9 +144,9 @@ simulate_X = function(n, p) {
 #'
 #' @return
 #' @export
-simulate_X_list = function(n_k, p) {
+simulate_X_list = function(n_k, p, mean = 0) {
 
-  return(lapply(n_k, function(n) simulate_X(n, p)))
+  return(lapply(n_k, function(n) simulate_X(n, p, mean)))
 
 }
 
