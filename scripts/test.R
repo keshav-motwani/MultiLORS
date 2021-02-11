@@ -2,7 +2,7 @@ library(MultiLORS)
 
 set.seed(1)
 
-n_k = rep(500, 3)
+n_k = rep(1000, 3)
 p = 50
 q = 10
 theta = rep(100, 3)
@@ -15,6 +15,7 @@ X = simulate_X_list(n_k, p, mean)
 L = simulate_L_list(n_k, q, theta)
 E = simulate_E_list(n_k, Sigma)
 Beta = simulate_Beta(p, q, sparsity, R2, X, L, E)
+print(Beta[1:5, 1:5])
 Y = compute_Y_list(X, Beta, L, E)
 indices = list(1:q, 1:q, 1:q)
 
@@ -36,8 +37,8 @@ glmnet_fit = fit_glmnet(Y, X, indices, Y_val, X_val, indices_val)
 
 best_indices_MultiLORS = which_min(MultiLORS_fit$tuning$validation$SSE)
 best_index_glmnet = which_min(glmnet_fit$tuning$validation$SSE)
-sum((Beta - as.matrix(MultiLORS_fit$model_fits[[best_indices_MultiLORS[1]]][[best_indices_MultiLORS[2]]]$Beta)) ^ 2)
-sum((Beta - as.matrix(glmnet_fit$model_fits[[best_index_glmnet]]$Beta)) ^ 2)
+sum((Beta[-1, ] - as.matrix(MultiLORS_fit$model_fits[[best_indices_MultiLORS[1]]][[best_indices_MultiLORS[2]]]$Beta)[-1, ]) ^ 2)
+sum((Beta[-1, ] - as.matrix(glmnet_fit$model_fits[[best_index_glmnet]]$Beta)[-1, ]) ^ 2)
 
 MultiLORS_Beta_hat = MultiLORS_fit$model_fits[[best_indices_MultiLORS[1]]][[best_indices_MultiLORS[2]]]$Beta
 glmnet_Beta_hat = glmnet_fit$model_fits[[best_index_glmnet]]$Beta
