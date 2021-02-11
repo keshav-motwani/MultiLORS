@@ -9,30 +9,29 @@ theta = rep(100, 3)
 Sigma = diag(1, nrow = q, ncol = q)
 sparsity = 0.9
 R2 = 0.9
+mean = 5
 
-X = simulate_X_list(n_k, p)
+X = simulate_X_list(n_k, p, mean)
 L = simulate_L_list(n_k, q, theta)
 E = simulate_E_list(n_k, Sigma)
 Beta = simulate_Beta(p, q, sparsity, R2, X, L, E)
 Y = compute_Y_list(X, Beta, L, E)
 indices = list(1:q, 1:q, 1:q)
 
-X_val = simulate_X_list(n_k, p)
+X_val = simulate_X_list(n_k, p, mean)
 L_val = simulate_L_list(n_k, q, theta)
 E_val = simulate_E_list(n_k, Sigma)
 Y_val = compute_Y_list(X_val, Beta, L_val, E_val)
 indices_val = list(1:q, 1:q, 1:q)
 
-X_test = simulate_X_list(n_k, p)
+X_test = simulate_X_list(n_k, p, mean)
 L_test = simulate_L_list(n_k, q, theta)
 E_test = simulate_E_list(n_k, Sigma)
 Y_test = compute_Y_list(X_test, Beta, L_test, E_test)
 indices_test = list(1:q, 1:q, 1:q)
 
-print(system.time({MultiLORS_fit = MultiLORS(Y, X, indices, verbose = 0, n_iter = 100, n_cores = 4)}))
-
-print(system.time({MultiLORS_fit = MultiLORS(Y, X, indices, Y_val, X_val, indices_val, verbose = 0, n_iter = 100, n_cores = 4)}))
-
+print(system.time({MultiLORS_fit = MultiLORS(Y, X, indices, Y_val, X_val, indices_val, verbose = 0, n_iter = 100, n_cores = 4, early_stopping = FALSE)}))
+print(MultiLORS_fit$tuning$validation$n_iter)
 glmnet_fit = fit_glmnet(Y, X, indices, Y_val, X_val, indices_val)
 
 best_indices_MultiLORS = which_min(MultiLORS_fit$tuning$validation$SSE)
