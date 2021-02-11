@@ -35,6 +35,7 @@ MultiLORS = function(Y_list,
                      return_L = TRUE,
                      n_cores = 1) {
 
+  X_list_unstd = X_list
   X_list = standardize_X(X_list)
   X_mean = attributes(X_list)$mean
   X_sd = attributes(X_list)$sd
@@ -95,7 +96,7 @@ MultiLORS = function(Y_list,
              gamma_weights = gamma_weights,
              lambda_grid = lambda_grid)
 
-  train = compute_tuning_performance(fit, Y_list, X_list, indices_list, Y_list, indices_list)
+  train = compute_tuning_performance(fit, Y_list, X_list_unstd, indices_list, Y_list, indices_list)
 
   if (!is.null(X_list_validation)) {
     validation = compute_tuning_performance(fit, Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list)
@@ -155,8 +156,6 @@ fit_solution_path = function(Y_list,
       indices_list = indices_list,
       XtX_list = XtX_list,
       XtY_list = XtY_list,
-      X_mean = X_mean,
-      X_sd = X_sd,
       lambda = lambda_grid[gamma, lambda],
       gamma = gamma_sequence[gamma],
       gamma_weights = gamma_weights,
@@ -189,7 +188,7 @@ fit_solution_path = function(Y_list,
     Beta_old = model$Beta
     L_list_old = model$L_list
 
-    model$Beta = as(model$Beta, "dgCMatrix")
+    model$Beta = as(adjust_Beta(model$Beta, X_mean, X_sd), "dgCMatrix")
     colnames(model$Beta) = attr(indices_list, "responses")
     if (!is.null(colnames(X_list[[1]]))) rownames(model$Beta) = colnames(X_list[[1]])
 

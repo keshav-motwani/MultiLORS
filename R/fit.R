@@ -4,8 +4,6 @@ fit = function(Y_list,
                indices_list,
                XtX_list,
                XtY_list,
-               X_mean,
-               X_sd,
                lambda,
                gamma,
                gamma_weights,
@@ -70,7 +68,7 @@ fit = function(Y_list,
   }
 
   result = list(
-    Beta = adjust_Beta(Beta_new, X_mean, X_sd),
+    Beta = Beta_new,
     L_list = L_list,
     objective = objective,
     n_iter = iter,
