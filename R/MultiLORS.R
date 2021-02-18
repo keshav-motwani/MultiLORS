@@ -176,6 +176,8 @@ fit_solution_path = function(Y_list,
     model$performance$train$correlation = compute_correlation(Y_list, X_list, indices_list, model$Beta)
 
     adjusted_Beta = adjust_Beta(model$Beta, X_mean, X_sd)
+    colnames(adjusted_Beta) = attr(indices_list, "responses")
+    if (!is.null(colnames(X_list[[1]]))) rownames(adjusted_Beta) = colnames(X_list[[1]])
 
     if (!is.null(Y_list_validation)) {
       validation_error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, adjusted_Beta)
@@ -191,8 +193,6 @@ fit_solution_path = function(Y_list,
     L_list_old = model$L_list
 
     model$Beta = as(adjusted_Beta, "dgCMatrix")
-    colnames(model$Beta) = attr(indices_list, "responses")
-    if (!is.null(colnames(X_list[[1]]))) rownames(model$Beta) = colnames(X_list[[1]])
 
     result = c(result, list(model))
 
