@@ -31,7 +31,7 @@ E_test = simulate_E_list(n_k, Sigma)
 Y_test = compute_Y_list(X_test, Beta, L_test, E_test)
 indices_test = list(1:q, 1:q, 1:q)
 
-print(system.time({MultiLORS_fit = MultiLORS(Y, X, indices, Y_val, X_val, indices_val, verbose = 1, n_iter = 250, n_cores = 1, early_stopping = FALSE)}))
+print(system.time({MultiLORS_fit = MultiLORS(Y, X, indices, Y_val, X_val, indices_val, verbose = 0, n_iter = 250, n_cores = 1, early_stopping = FALSE)}))
 print(MultiLORS_fit$tuning$validation$n_iter)
 glmnet_fit = fit_glmnet(Y, X, indices, Y_val, X_val, indices_val)
 
