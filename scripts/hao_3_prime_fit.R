@@ -71,14 +71,47 @@ if (!file.exists(data_file)) {
 
 }
 
+
 MultiLORS_fit = MultiLORS(prepared_train$Y_list, X_list[train_data], prepared_train$indices_list,
-                  prepared_validation$Y_list, X_list[validation_data], prepared_validation$indices_list,
-                  verbose = 1, n_iter = 1000, tolerance = 1e-6, n_lambda = 20, n_gamma = 20, early_stopping = TRUE,
-                  return_L = TRUE, n_cores = 20)
+                          prepared_validation$Y_list, X_list[validation_data], prepared_validation$indices_list,
+                          verbose = 1, n_iter = 1000, tolerance = 1e-6, n_lambda = 20, n_gamma = 20, early_stopping = TRUE,
+                          return_L = TRUE, n_cores = 20)
 
 saveRDS(MultiLORS_fit, file.path(result_path, "MultiLORS_fit.rds"))
 
+MultiLORS_refit = refit_MultiLORS(MultiLORS_fit, prepared_train$Y_list, X_list[train_data], prepared_train$indices_list,
+                                  prepared_validation$Y_list, X_list[validation_data], prepared_validation$indices_list)
+
+saveRDS(MultiLORS_refit, file.path(result_path, "MultiLORS_refit.rds"))
+
 glmnet_fit = fit_glmnet(prepared_train$Y_list, X_list[train_data], prepared_train$indices_list,
-                   prepared_validation$Y_list, X_list[validation_data], prepared_validation$indices_list)
+                        prepared_validation$Y_list, X_list[validation_data], prepared_validation$indices_list)
 
 saveRDS(glmnet_fit, file.path(result_path, "glmnet_fit.rds"))
+
+glmnet_refit = refit_glmnet(glmnet_fit, prepared_train$Y_list, X_list[train_data], prepared_train$indices_list,
+                            prepared_validation$Y_list, X_list[validation_data], prepared_validation$indices_list)
+
+saveRDS(glmnet_refit, file.path(result_path, "glmnet_refit.rds"))
+
+OLS_fit = fit_OLS(prepared_train$Y_list, X_list[train_data], prepared_train$indices_list)
+
+saveRDS(glmnet_refit, file.path(result_path, "OLS_fit.rds"))
+
+
+(best_indices_MultiLORS = which_min(MultiLORS_fit$tuning$validation$SSE))
+(best_indices_MultiLORS_refit = which_min(MultiLORS_refit$tuning$validation$SSE))
+(best_index_glmnet = which_min(glmnet_fit$tuning$validation$SSE))
+(best_index_glmnet_refit = which_min(glmnet_refit$tuning$validation$SSE))
+
+MultiLORS_Beta_hat = MultiLORS_fit$model_fits[[best_indices_MultiLORS[1]]][[best_indices_MultiLORS[2]]]$Beta
+MultiLORS_refit_Beta_hat = MultiLORS_refit$model_fits[[best_indices_MultiLORS_refit[1]]][[best_indices_MultiLORS_refit[2]]]$Beta
+glmnet_Beta_hat = glmnet_fit$model_fits[[best_index_glmnet]]$Beta
+glmnet_refit_Beta_hat = glmnet_refit$model_fits[[best_index_glmnet_refit]]$Beta
+OLS_Beta_hat = OLS_fit
+
+compute_avg_R2(prepared_test$Y_list, X_list[test_data], prepared_test$indices_list, prepared_train$Y_list, prepared_train$indices_list, MultiLORS_Beta_hat)
+compute_avg_R2(prepared_test$Y_list, X_list[test_data], prepared_test$indices_list, prepared_train$Y_list, prepared_train$indices_list, MultiLORS_refit_Beta_hat)
+compute_avg_R2(prepared_test$Y_list, X_list[test_data], prepared_test$indices_list, prepared_train$Y_list, prepared_train$indices_list, glmnet_Beta_hat)
+compute_avg_R2(prepared_test$Y_list, X_list[test_data], prepared_test$indices_list, prepared_train$Y_list, prepared_train$indices_list, glmnet_refit_Beta_hat)
+compute_avg_R2(prepared_test$Y_list, X_list[test_data], prepared_test$indices_list, prepared_train$Y_list, prepared_train$indices_list, OLS_Beta_hat)
