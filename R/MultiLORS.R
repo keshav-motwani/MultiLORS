@@ -137,13 +137,17 @@ refit_MultiLORS = function(fit,
     X_list_validation = lapply(X_list_validation, function(k) cbind(1, k))
   }
 
+  q = max(unlist(indices_list))
+
+  subsetted_X = lapply(1:q, function(i) subset_observed_data_univariate(NULL, X_list, indices_list, i)$X)
+
   refit_Betas = parallel::mclapply(
     fit$model_fits,
     function(solution_path) {
-      print(paste0("gamma: ", solution_path[[1]]$gamma_index))
+      # print(paste0("gamma: ", solution_path[[1]]$gamma_index))
       lapply(solution_path, function(model) {
         print(paste0("gamma: ", model$gamma_index, "lambda: ", model$lambda_index))
-        MultiLORS:::refit_OLS(Y_list, X_list, model$L_list, indices_list, model$Beta)
+        refit_OLS(Y_list, subsetted_X, model$L_list, indices_list, model$Beta)
       })
     },
   mc.cores = n_cores)

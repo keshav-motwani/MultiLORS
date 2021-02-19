@@ -113,10 +113,14 @@ refit_glmnet = function(fit,
     X_list_validation = lapply(X_list_validation, function(k) cbind(1, k))
   }
 
+  q = max(unlist(indices_list))
+
+  subsetted_X = lapply(1:q, function(i) subset_observed_data_univariate(NULL, X_list, indices_list, i)$X)
+
   refit_Betas = parallel::mclapply(
     fit$model_fits,
     function(model) {
-      refit_OLS(Y_list, X_list, NULL, indices_list, model$Beta)
+      refit_OLS(Y_list, subsetted_X, NULL, indices_list, model$Beta)
     },
     mc.cores = n_cores)
 

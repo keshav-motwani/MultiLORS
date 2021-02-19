@@ -56,7 +56,7 @@ subset_observed_data_univariate = function(Y_list, X_list, indices_list, index) 
   new_Y_list = list()
   new_X_list = list()
 
-  for (k in 1:length(Y_list)) {
+  for (k in 1:length(indices_list)) {
 
     if (index %in% indices_list[[k]]) {
 
