@@ -13,6 +13,10 @@ compute_s_Beta <- function(XtX_list, p, q, dataset_indices_list) {
     .Call(`_MultiLORS_compute_s_Beta`, XtX_list, p, q, dataset_indices_list)
 }
 
+OLS <- function(X, Y) {
+    .Call(`_MultiLORS_OLS`, X, Y)
+}
+
 evaluate_g <- function(Y_list, X_list, L_list, indices_list, Beta) {
     .Call(`_MultiLORS_evaluate_g`, Y_list, X_list, L_list, indices_list, Beta)
 }

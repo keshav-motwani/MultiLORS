@@ -128,13 +128,23 @@ refit_MultiLORS = function(fit,
                            indices_list,
                            Y_list_validation = NULL,
                            X_list_validation = NULL,
-                           indices_list_validation = NULL) {
+                           indices_list_validation = NULL,
+                           n_cores = 1) {
 
   X_list = lapply(X_list, function(k) cbind(1, k))
 
   if (!is.null(X_list_validation)) {
     X_list_validation = lapply(X_list_validation, function(k) cbind(1, k))
   }
+
+  refit_Betas = parallel::mclapply(
+    fit$model_fits,
+    function(solution_path) {
+      lapply(solution_path, function(model) {
+        MultiLORS:::refit_OLS(Y_list, X_list, model$L_list, indices_list, model$Beta)
+      })
+    },
+  mc.cores = n_cores)
 
   for (solution_path in fit$model_fits) {
 
@@ -145,7 +155,7 @@ refit_MultiLORS = function(fit,
       L_list = model$L_list
       Beta = model$Beta
 
-      refit_Beta = refit_OLS(Y_list, X_list, L_list, indices_list, Beta)
+      refit_Beta = refit_Betas[[gamma]][[lambda]]
       fit$model_fits[[gamma]][[lambda]]$Beta = refit_Beta
       refit_Beta = as.matrix(refit_Beta)
 

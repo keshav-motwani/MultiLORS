@@ -21,7 +21,7 @@ refit_OLS = function(Y_list, X_list, L_list, indices_list, Beta) {
 
     data = subset_observed_data_univariate(Y_list, X_list, indices_list, i)
 
-    coefficients[nonzero] = lsfit(x = data$X[, nonzero, drop = FALSE], y = data$Y, intercept = FALSE)$coefficients
+    coefficients[nonzero] = OLS(data$X[, nonzero, drop = FALSE], data$Y)
 
     refitted_Beta[, i] = coefficients
 
