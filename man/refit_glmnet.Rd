@@ -11,7 +11,8 @@ refit_glmnet(
   indices_list,
   Y_list_validation = NULL,
   X_list_validation = NULL,
-  indices_list_validation = NULL
+  indices_list_validation = NULL,
+  n_cores = 1
 )
 }
 \arguments{

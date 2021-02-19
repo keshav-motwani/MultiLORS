@@ -104,7 +104,8 @@ refit_glmnet = function(fit,
                         indices_list,
                         Y_list_validation = NULL,
                         X_list_validation = NULL,
-                        indices_list_validation = NULL) {
+                        indices_list_validation = NULL,
+                        n_cores = 1) {
 
   X_list = lapply(X_list, function(k) cbind(1, k))
 
@@ -112,11 +113,18 @@ refit_glmnet = function(fit,
     X_list_validation = lapply(X_list_validation, function(k) cbind(1, k))
   }
 
+  refit_Betas = parallel::mclapply(
+    fit$model_fits,
+    function(model) {
+      refit_OLS(Y_list, X_list, NULL, indices_list, model$Beta)
+    },
+    mc.cores = n_cores)
+
   for (lambda in 1:length(fit$model_fits)) {
 
     Beta = fit$model_fits[[lambda]]$Beta
 
-    refit_Beta = refit_OLS(Y_list, X_list, NULL, indices_list, Beta)
+    refit_Beta = refit_Betas[[lambda]]
     fit$model_fits[[lambda]]$Beta = refit_Beta
     refit_Beta = as.matrix(refit_Beta)
 
