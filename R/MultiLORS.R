@@ -110,103 +110,67 @@ MultiLORS = function(Y_list,
 
 }
 
-fit_solution_path = function(Y_list,
-                             X_list,
-                             indices_list,
-                             Y_list_validation,
-                             X_list_validation,
-                             indices_list_validation,
-                             standardize,
-                             n_lambda,
-                             n_gamma,
-                             lambda_min_ratio,
-                             gamma_min_ratio,
-                             n_iter,
-                             tolerance,
-                             early_stopping,
-                             verbose,
-                             return_L,
-                             p,
-                             q,
-                             XtX_list,
-                             XtY_list,
-                             X_mean,
-                             X_sd,
-                             lambda_grid,
-                             gamma_sequence,
-                             gamma_weights,
-                             s_Beta,
-                             gamma) {
+#' Refit MultiLORS on nonzero coefficients and corrected responses using OLS
+#'
+#' @param fit
+#' @param Y_list
+#' @param X_list
+#' @param indices_list
+#' @param Y_list_validation
+#' @param X_list_validation
+#' @param indices_list_validation
+#'
+#' @return
+#' @export
+refit_MultiLORS = function(fit,
+                           Y_list,
+                           X_list,
+                           indices_list,
+                           Y_list_validation = NULL,
+                           X_list_validation = NULL,
+                           indices_list_validation = NULL) {
 
-  result = list()
+  X_list = lapply(X_list, function(k) cbind(1, k))
 
-  Beta_old = matrix(0, nrow = p, ncol = q)
+  if (!is.null(X_list_validation)) {
+    X_list_validation = lapply(X_list_validation, function(k) cbind(1, k))
+  }
 
-  min_validation_error = Inf
-  max_avg_validation_R2 = 0
+  for (solution_path in fit$model_fits) {
 
-  for (lambda in 1:n_lambda) {
+    for (model in solution_path) {
 
-    if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda))
+      gamma = model$gamma_index
+      lambda = model$lambda_index
+      L_list = model$L_list
+      Beta = model$Beta
 
-    model = fit(
-      Y_list = Y_list,
-      X_list = X_list,
-      q = q,
-      indices_list = indices_list,
-      XtX_list = XtX_list,
-      XtY_list = XtY_list,
-      lambda = lambda_grid[gamma, lambda],
-      gamma = gamma_sequence[gamma],
-      gamma_weights = gamma_weights,
-      Beta_old = Beta_old,
-      s_Beta = s_Beta,
-      n_iter = n_iter,
-      tolerance = tolerance,
-      verbose = verbose,
-      return_L
-    )
+      refit_Beta = refit_OLS(Y_list, X_list, L_list, indices_list, Beta)
+      fit$model_fits[[gamma]][[lambda]]$Beta = refit_Beta
+      refit_Beta = as.matrix(refit_Beta)
 
-    model$lambda_index = lambda
-    model$gamma_index = gamma
+      fit$model_fits[[gamma]][[lambda]]$performance$train$R2 = compute_R2(Y_list, X_list, indices_list, Y_list, indices_list, refit_Beta)
+      fit$model_fits[[gamma]][[lambda]]$performance$train$correlation = compute_correlation(Y_list, X_list, indices_list, refit_Beta)
 
-    model$performance = list(train = list(), validation = list())
-
-    model$performance$train$R2 = compute_R2(Y_list, X_list, indices_list, Y_list, indices_list, model$Beta)
-    model$performance$train$correlation = compute_correlation(Y_list, X_list, indices_list, model$Beta)
-
-    adjusted_Beta = adjust_Beta(model$Beta, X_mean, X_sd)
-    colnames(adjusted_Beta) = attr(indices_list, "responses")
-    if (!is.null(colnames(X_list[[1]]))) rownames(adjusted_Beta) = colnames(X_list[[1]])
-
-    if (!is.null(Y_list_validation)) {
-      validation_error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, adjusted_Beta)
-      avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, adjusted_Beta)
-      min_validation_error = min(min_validation_error, validation_error)
-      max_avg_validation_R2 = max(max_avg_validation_R2, avg_validation_R2)
-      model$performance$validation$R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, adjusted_Beta)
-      model$performance$validation$correlation  = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, adjusted_Beta)
-      if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda, " --- Validation Error: ", validation_error, "; Avg Validation R2: ", round(avg_validation_R2, 4)))
-    }
-
-    Beta_old = model$Beta
-    L_list_old = model$L_list
-
-    model$Beta = as(adjusted_Beta, "dgCMatrix")
-
-    result = c(result, list(model))
-
-    if (early_stopping && !is.null(Y_list_validation)) {
-      if (lambda > 5 &&
-          lambda > n_lambda / 4 &&
-          validation_error > min_validation_error * 1.01 &&
-          avg_validation_R2 < max_avg_validation_R2 * 0.99) {
-        break
+      if (!is.null(Y_list_validation)) {
+        fit$model_fits[[gamma]][[lambda]]$performance$validation$R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, refit_Beta)
+        fit$model_fits[[gamma]][[lambda]]$performance$validation$correlation  = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, refit_Beta)
       }
+
     }
 
   }
 
-  return(result)
+  train = compute_tuning_performance(fit, Y_list, X_list, indices_list, Y_list, indices_list)
+
+  if (!is.null(X_list_validation)) {
+    validation = compute_tuning_performance(fit, Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list)
+  } else {
+    validation = NULL
+  }
+
+  fit$tuning = list(train = train, validation = validation)
+
+  return(fit)
 
 }
