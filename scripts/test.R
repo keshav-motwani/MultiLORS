@@ -34,9 +34,9 @@ indices_test = replicate(5, 1:q, simplify = FALSE)
 set.seed(Sys.time()) # results should be same regardless of seed
 
 print(system.time({MultiLORS_fit = MultiLORS(Y, X, indices, Y_val, X_val, indices_val, verbose = 0, n_iter = 250, n_cores = 4, early_stopping = FALSE)}))
-MultiLORS_refit = refit_MultiLORS(MultiLORS_fit, Y, X, indices, Y_val, X_val, indices_val)
+print(system.time({MultiLORS_refit = refit_MultiLORS(MultiLORS_fit, Y, X, indices, Y_val, X_val, indices_val, n_cores = 4)}))
 glmnet_fit = fit_glmnet(Y, X, indices, Y_val, X_val, indices_val)
-glmnet_refit = refit_glmnet(glmnet_fit, Y, X, indices, Y_val, X_val, indices_val)
+glmnet_refit = refit_glmnet(glmnet_fit, Y, X, indices, Y_val, X_val, indices_val, n_cores = 4)
 OLS_fit = fit_OLS(Y, X, indices)
 
 best_indices_MultiLORS = which_min(MultiLORS_fit$tuning$validation$SSE)
