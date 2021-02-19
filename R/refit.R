@@ -15,6 +15,8 @@ refit_OLS = function(Y_list, X_list, L_list, indices_list, Beta) {
 
   for (i in 1:q) {
 
+    print(i)
+
     coefficients = numeric(p)
 
     nonzero = unique(c(1, which(Beta[, i] != 0)))
