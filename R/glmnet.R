@@ -73,7 +73,12 @@ fit_glmnet = function(Y_list,
              n_lambda = n_lambda)
 
   train = compute_tuning_performance_glmnet(fit, Y_list, X_list, indices_list, Y_list, indices_list)
-  validation = compute_tuning_performance_glmnet(fit, Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list)
+
+  if (!is.null(X_list_validation)) {
+    validation = compute_tuning_performance_glmnet(fit, Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list)
+  } else {
+    validation = NULL
+  }
 
   fit$tuning = list(train = train, validation = validation)
 
