@@ -139,8 +139,11 @@ refit_MultiLORS = function(fit,
 
   q = max(unlist(indices_list))
 
-  subsetted_X = lapply(1:q, function(i) subset_observed_data_univariate(NULL, X_list, indices_list, i)$X)
-  subsetted_XtX = lapply(subsetted_X, crossprod)
+  X = do.call(rbind, X_list)
+  k = rep(1:length(X_list), sapply(X_list, nrow))
+  dataset_indices_list = lapply(1:q, function(j) which(sapply(1:length(X_list), function(k) j %in% indices_list[[k]])))
+
+  subsetted_XtX = lapply(1:q, function(i) crossprod(X[k %in% dataset_indices_list[[i]], , drop = FALSE]))
 
   refit_Betas = parallel::mclapply(
     fit$model_fits,
@@ -148,7 +151,7 @@ refit_MultiLORS = function(fit,
       # print(paste0("gamma: ", solution_path[[1]]$gamma_index))
       lapply(solution_path, function(model) {
         print(paste0("gamma: ", model$gamma_index, " lambda: ", model$lambda_index))
-        refit_OLS(Y_list, subsetted_XtX, subsetted_X, model$L_list, indices_list, model$Beta)
+        refit_OLS(Y_list, subsetted_XtX, X, k, model$L_list, indices_list, dataset_indices_list, model$Beta)
       })
     },
   mc.cores = n_cores)

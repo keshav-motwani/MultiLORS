@@ -1,4 +1,4 @@
-refit_OLS = function(Y_list, subsetted_XtX, subsetted_X, L_list, indices_list, Beta) {
+refit_OLS = function(Y_list, subsetted_XtX, X, k, L_list, indices_list, dataset_indices_list, Beta) {
 
   if (!is.null(L_list)) {
     Y_list = mapply(Y = Y_list, L = L_list, FUN = function(Y, L) {
@@ -23,7 +23,7 @@ refit_OLS = function(Y_list, subsetted_XtX, subsetted_X, L_list, indices_list, B
 
     data = subset_observed_data_univariate(Y_list, NULL, indices_list, i)
 
-    coefficients[nonzero] = OLS(subsetted_XtX[[i]][nonzero, nonzero, drop = FALSE], subsetted_X[[i]][, nonzero, drop = FALSE], data$Y)
+    coefficients[nonzero] = OLS(subsetted_XtX[[i]][nonzero, nonzero, drop = FALSE], X[k %in% dataset_indices_list[[i]], nonzero, drop = FALSE], data$Y)
 
     refitted_Beta[, i] = coefficients
 
