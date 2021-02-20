@@ -148,9 +148,7 @@ refit_MultiLORS = function(fit,
   refit_Betas = parallel::mclapply(
     fit$model_fits,
     function(solution_path) {
-      # print(paste0("gamma: ", solution_path[[1]]$gamma_index))
       lapply(solution_path, function(model) {
-        print(paste0("gamma: ", model$gamma_index, " lambda: ", model$lambda_index))
         refit_OLS(Y_list, subsetted_XtX, X, k, model$L_list, indices_list, dataset_indices_list, model$Beta)
       })
     },

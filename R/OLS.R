@@ -19,7 +19,9 @@ fit_OLS = function(Y_list,
 
     data = subset_observed_data_univariate(Y_list, X_list, indices_list, index)
 
-    Beta[, index] = lsfit(x = data$X, y = data$Y)$coefficients
+    data$X = cbind(1, data$X)
+
+    Beta[, index] = OLS(crossprod(data$X), data$X, data$Y)
 
   }
 
