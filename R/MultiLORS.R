@@ -140,14 +140,15 @@ refit_MultiLORS = function(fit,
   q = max(unlist(indices_list))
 
   subsetted_X = lapply(1:q, function(i) subset_observed_data_univariate(NULL, X_list, indices_list, i)$X)
+  subsetted_XtX = lapply(subsetted_X, crossprod)
 
   refit_Betas = parallel::mclapply(
     fit$model_fits,
     function(solution_path) {
       # print(paste0("gamma: ", solution_path[[1]]$gamma_index))
       lapply(solution_path, function(model) {
-        print(paste0("gamma: ", model$gamma_index, "lambda: ", model$lambda_index))
-        refit_OLS(Y_list, subsetted_X, model$L_list, indices_list, model$Beta)
+        print(paste0("gamma: ", model$gamma_index, " lambda: ", model$lambda_index))
+        refit_OLS(Y_list, subsetted_XtX, subsetted_X, model$L_list, indices_list, model$Beta)
       })
     },
   mc.cores = n_cores)
@@ -163,6 +164,7 @@ refit_MultiLORS = function(fit,
 
       refit_Beta = refit_Betas[[gamma]][[lambda]]
       fit$model_fits[[gamma]][[lambda]]$Beta = refit_Beta
+      fit$model_fits[[gamma]][[lambda]]$L_list = NULL
       refit_Beta = as.matrix(refit_Beta)
 
       fit$model_fits[[gamma]][[lambda]]$performance$train$R2 = compute_R2(Y_list, X_list, indices_list, Y_list, indices_list, refit_Beta)

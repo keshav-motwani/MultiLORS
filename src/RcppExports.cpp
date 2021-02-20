@@ -59,14 +59,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // OLS
-arma::colvec OLS(const arma::mat& X, const arma::colvec& Y);
-RcppExport SEXP _MultiLORS_OLS(SEXP XSEXP, SEXP YSEXP) {
+arma::colvec OLS(const arma::mat& XtX, const arma::mat& X, const arma::colvec& Y);
+RcppExport SEXP _MultiLORS_OLS(SEXP XtXSEXP, SEXP XSEXP, SEXP YSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type XtX(XtXSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const arma::colvec& >::type Y(YSEXP);
-    rcpp_result_gen = Rcpp::wrap(OLS(X, Y));
+    rcpp_result_gen = Rcpp::wrap(OLS(XtX, X, Y));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -171,7 +172,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_MultiLORS_compute_gradient_Beta", (DL_FUNC) &_MultiLORS_compute_gradient_Beta, 7},
     {"_MultiLORS_update_Beta", (DL_FUNC) &_MultiLORS_update_Beta, 11},
     {"_MultiLORS_compute_s_Beta", (DL_FUNC) &_MultiLORS_compute_s_Beta, 4},
-    {"_MultiLORS_OLS", (DL_FUNC) &_MultiLORS_OLS, 2},
+    {"_MultiLORS_OLS", (DL_FUNC) &_MultiLORS_OLS, 3},
     {"_MultiLORS_evaluate_g", (DL_FUNC) &_MultiLORS_evaluate_g, 5},
     {"_MultiLORS_compute_error", (DL_FUNC) &_MultiLORS_compute_error, 4},
     {"_MultiLORS_l1_penalty", (DL_FUNC) &_MultiLORS_l1_penalty, 2},
