@@ -2,7 +2,7 @@
 % Please edit documentation in R/MultiLORS.R
 \name{MultiLORS}
 \alias{MultiLORS}
-\title{Fit LORS model}
+\title{Fit MultiLORS model}
 \usage{
 MultiLORS(
   Y_list,
@@ -11,12 +11,13 @@ MultiLORS(
   Y_list_validation = NULL,
   X_list_validation = NULL,
   indices_list_validation = NULL,
+  standardize_Y = FALSE,
+  standardize_X = TRUE,
+  gamma_method = 1,
   n_lambda = 20,
   n_gamma = 20,
   lambda_min_ratio = 0.001,
   gamma_min_ratio = 0.001,
-  standardize_Y = FALSE,
-  standardize_X = TRUE,
   n_iter = 1000,
   tolerance = 1e-06,
   early_stopping = TRUE,
@@ -32,5 +33,5 @@ MultiLORS(
 
 }
 \description{
-Fit LORS model
+Fit MultiLORS model
 }
