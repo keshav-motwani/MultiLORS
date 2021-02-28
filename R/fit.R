@@ -11,8 +11,7 @@ fit = function(Y_list,
                s_Beta,
                n_iter,
                tolerance,
-               verbose,
-               return_L) {
+               verbose) {
 
   objective = numeric(2 * n_iter)
 
@@ -53,7 +52,6 @@ fit = function(Y_list,
     }
 
     Beta_old = Beta_new
-    L_list_old = L_list_new
 
   }
 
@@ -61,15 +59,9 @@ fit = function(Y_list,
 
   objective = objective[1:(2 * iter)]
 
-  if (return_L) {
-    L_list = compress_L(L_list_new)
-  } else {
-    L_list = NULL
-  }
-
   result = list(
     Beta = Beta_new,
-    L_list = L_list,
+    L_list = L_list_new,
     objective = objective,
     n_iter = iter,
     lambda = lambda,
@@ -102,6 +94,7 @@ fit_solution_path = function(Y_list,
                              XtY_list,
                              X_mean,
                              X_sd,
+                             Y_sd,
                              lambda_grid,
                              gamma_sequence,
                              gamma_weights,
@@ -133,21 +126,24 @@ fit_solution_path = function(Y_list,
       s_Beta = s_Beta,
       n_iter = n_iter,
       tolerance = tolerance,
-      verbose = verbose,
-      return_L
+      verbose = verbose
     )
 
     model$lambda_index = lambda
     model$gamma_index = gamma
 
+    Beta_old = model$Beta
+
+    adjusted_Beta = adjust_Beta(model$Beta, X_mean, X_sd, Y_sd)
+    colnames(adjusted_Beta) = attr(indices_list, "responses")
+    if (!is.null(colnames(X_list[[1]]))) rownames(adjusted_Beta) = colnames(X_list[[1]])
+
+    adjusted_L_list = adjust_L(model$L_list, indices_list, Y_sd)
+
     model$performance = list(train = list(), validation = list())
 
     model$performance$train$R2 = compute_R2(Y_list, X_list, indices_list, Y_list, indices_list, model$Beta)
     model$performance$train$correlation = compute_correlation(Y_list, X_list, indices_list, model$Beta)
-
-    adjusted_Beta = adjust_Beta(model$Beta, X_mean, X_sd)
-    colnames(adjusted_Beta) = attr(indices_list, "responses")
-    if (!is.null(colnames(X_list[[1]]))) rownames(adjusted_Beta) = colnames(X_list[[1]])
 
     if (!is.null(Y_list_validation)) {
       validation_error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, adjusted_Beta)
@@ -159,10 +155,13 @@ fit_solution_path = function(Y_list,
       if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda, " --- Validation Error: ", validation_error, "; Avg Validation R2: ", round(avg_validation_R2, 4)))
     }
 
-    Beta_old = model$Beta
-    L_list_old = model$L_list
-
     model$Beta = as(adjusted_Beta, "dgCMatrix")
+
+    if (return_L) {
+      model$L_list = compress_L(adjusted_L_list)
+    } else {
+      model$L_list = NULL
+    }
 
     result = c(result, list(model))
 

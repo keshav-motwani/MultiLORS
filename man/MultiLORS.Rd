@@ -15,6 +15,8 @@ MultiLORS(
   n_gamma = 20,
   lambda_min_ratio = 0.001,
   gamma_min_ratio = 0.001,
+  standardize_Y = FALSE,
+  standardize_X = TRUE,
   n_iter = 1000,
   tolerance = 1e-06,
   early_stopping = TRUE,

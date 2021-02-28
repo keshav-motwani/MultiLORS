@@ -16,6 +16,8 @@
 #' @param line_search
 #' @param verbose
 #'
+#' @importFrom parallel mclapply
+#'
 #' @return
 #' @export
 MultiLORS = function(Y_list,
@@ -28,6 +30,8 @@ MultiLORS = function(Y_list,
                      n_gamma = 20,
                      lambda_min_ratio = 0.001,
                      gamma_min_ratio = 0.001,
+                     standardize_Y = FALSE,
+                     standardize_X = TRUE,
                      n_iter = 1000,
                      tolerance = 1e-6,
                      early_stopping = TRUE,
@@ -35,17 +39,38 @@ MultiLORS = function(Y_list,
                      return_L = TRUE,
                      n_cores = 1) {
 
-  X_list_unstd = X_list
-  X_list = standardize_X(X_list)
-  X_mean = attributes(X_list)$mean
-  X_sd = attributes(X_list)$sd
-  X_list = lapply(X_list, function(k) cbind(1, k))
-  XtX_list = lapply(X_list, crossprod)
-  XtY_list = mapply(crossprod, x = X_list, y = Y_list, SIMPLIFY = FALSE)
+
   p = ncol(X_list[[1]])
   q = max(unlist(indices_list))
   K = length(X_list)
+
+  X_list_unstd = X_list
+  Y_list_unstd = Y_list
+
+  if (standardize_X) {
+    X_list = standardize_X(X_list)
+    X_mean = attributes(X_list)$mean
+    X_sd = attributes(X_list)$sd
+  } else {
+    X_mean = rep(0, p)
+    X_sd = rep(1, p)
+  }
+
+  if (standardize_Y) {
+    Y_list = standardize_Y(Y_list, indices_list)
+    Y_sd = attributes(Y_list)$sd
+  } else {
+    Y_sd = rep(1, q)
+  }
+
+  X_list = lapply(X_list, function(k) cbind(1, k))
+  XtX_list = lapply(X_list, crossprod)
+  XtY_list = mapply(crossprod, x = X_list, y = Y_list, SIMPLIFY = FALSE)
+
+  p = p + 1
+
   dataset_indices_list = lapply(1:q, function(j) which(sapply(1:K, function(k) j %in% indices_list[[k]])))
+
   if (!is.null(X_list_validation)) {
     X_list_validation = lapply(X_list_validation, function(k) cbind(1, k))
   }
@@ -56,7 +81,7 @@ MultiLORS = function(Y_list,
 
   s_Beta = compute_s_Beta(XtX_list, p, q, dataset_indices_list)
 
-  model_fits = parallel::mclapply(1:n_gamma, function(gamma) {
+  model_fits = mclapply(1:n_gamma, function(gamma) {
     fit_solution_path(
       Y_list,
       X_list,
@@ -80,6 +105,7 @@ MultiLORS = function(Y_list,
       XtY_list,
       X_mean,
       X_sd,
+      Y_sd,
       lambda_grid,
       gamma_sequence,
       gamma_weights,
@@ -96,10 +122,10 @@ MultiLORS = function(Y_list,
              gamma_weights = gamma_weights,
              lambda_grid = lambda_grid)
 
-  train = compute_tuning_performance(fit, Y_list, X_list_unstd, indices_list, Y_list, indices_list)
+  train = compute_tuning_performance(fit, Y_list_unstd, X_list_unstd, indices_list, Y_list_unstd, indices_list)
 
   if (!is.null(X_list_validation)) {
-    validation = compute_tuning_performance(fit, Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list)
+    validation = compute_tuning_performance(fit, Y_list_validation, X_list_validation, indices_list_validation, Y_list_unstd, indices_list)
   } else {
     validation = NULL
   }
@@ -119,6 +145,8 @@ MultiLORS = function(Y_list,
 #' @param Y_list_validation
 #' @param X_list_validation
 #' @param indices_list_validation
+#'
+#' @importFrom parallel mclapply
 #'
 #' @return
 #' @export
@@ -145,7 +173,7 @@ refit_MultiLORS = function(fit,
 
   subsetted_XtX = lapply(1:q, function(i) crossprod(X[k %in% dataset_indices_list[[i]], , drop = FALSE]))
 
-  refit_Betas = parallel::mclapply(
+  refit_Betas = mclapply(
     fit$model_fits,
     function(solution_path) {
       lapply(solution_path, function(model) {

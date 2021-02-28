@@ -1,10 +1,11 @@
+#' @importFrom matrixStats colVars
 standardize_X = function(X_list) {
 
   X = do.call(rbind, X_list)
   k = rep(1:length(X_list), sapply(X_list, nrow))
 
-  means = Matrix::colMeans(X)
-  vars = matrixStats::colVars(as.matrix(X)) * (nrow(X) - 1) / nrow(X)
+  means = colMeans(X)
+  vars = colVars(as.matrix(X)) * (nrow(X) - 1) / nrow(X)
 
   X = X - tcrossprod(rep(1, nrow(X)), means)
   X = X %*% diag(1 / sqrt(vars))
@@ -19,15 +20,44 @@ standardize_X = function(X_list) {
 
 }
 
-adjust_Beta = function(Beta, X_mean, X_sd) {
+#' @importFrom matrixStats colVars
+standardize_Y = function(Y_list, indices_list, dataset_indices_list) {
 
-  if (!is.null(X_mean)) {
+  q = max(unlist(indices_list))
 
-    Beta[1, ] = Beta[1, ] - crossprod(X_mean / X_sd, Beta[-1, ])
+  sds = lapply(Y_list, function(Y) colVars(Y))
 
-    Beta[-1, ] = diag(1 / X_sd) %*% Beta[-1, ]
+  n = lapply(Y_list, nrow)
+
+  pooled_sds = numeric(q)
+  pooled_n = numeric(q)
+  n_datasets = numeric(q)
+
+  for (k in 1:length(Y_list)) {
+
+    pooled_sds[indices_list[[k]]] = pooled_sds[indices_list[[k]]] + sds[[k]] * (n[[k]] - 1)
+    pooled_n[indices_list[[k]]] = pooled_n[indices_list[[k]]] + n[[k]]
+    n_datasets[indices_list[[k]]] = n_datasets[indices_list[[k]]] + 1
 
   }
+
+  pooled_sds = sqrt(pooled_sds / (pooled_n - n_datasets))
+
+  Y_list = lapply(Y_list, function(Y) Y %*% diag(x = 1/pooled_sds[indices_list[[k]]], nrow = ncol(Y)))
+
+  attributes(Y_list)$sd = pooled_sds
+
+  return(Y_list)
+
+}
+
+adjust_Beta = function(Beta, X_mean, X_sd, Y_sd) {
+
+  Beta[1, ] = Beta[1, ] - crossprod(X_mean / X_sd, Beta[-1, ])
+
+  Beta[-1, ] = diag(1 / X_sd) %*% Beta[-1, ]
+
+  Beta = Beta %*% diag(x = Y_sd, nrow = length(Y_sd))
 
   return(Beta)
 
@@ -43,7 +73,7 @@ adjust_Beta = function(Beta, X_mean, X_sd) {
   # model = glmnet(Xs, Y, family = "mgaussian", standardize = FALSE)
   # Beta1 = aperm(simplify2array(lapply(coef(model), as.matrix)), c(2, 1, 3))[3, , ]
   #
-  # Beta1[1, ] = Beta1[1, ] - v
+  # Beta1[1, ] = Beta1[1, ] - crossprod(X_mean / X_sd, Beta1[-1, ])
   #
   # Beta1[-1, ] = diag(1 / X_sd) %*% Beta1[-1, ]
   # head(Beta1)
@@ -51,5 +81,11 @@ adjust_Beta = function(Beta, X_mean, X_sd) {
   # model = glmnet(X, Y, family = "mgaussian", standardize = TRUE)
   # Beta2 = aperm(simplify2array(lapply(coef(model), as.matrix)), c(2, 1, 3))[3, , ]
   # head(Beta2)
+
+}
+
+adjust_L = function(L_list, indices_list, Y_sd) {
+
+  mapply(L_list, indices_list, FUN = function(L, indices) L %*% diag(x = Y_sd[indices], nrow = ncol(L)), SIMPLIFY = FALSE)
 
 }
