@@ -2,9 +2,7 @@ refit_OLS = function(Y_list, subsetted_XtX, X, k, L_list, indices_list, dataset_
 
   if (!is.null(L_list)) {
     Y_list = mapply(Y = Y_list, L = L_list, FUN = function(Y, L) {
-      D = diag(length(L$d))
-      diag(D) = L$d
-      Y - L$u %*% D %*% t(L$v)
+      Y - L$u %*% diag(x = L$d, nrow = length(L$d)) %*% t(L$v)
     }, SIMPLIFY = FALSE)
   }
 
@@ -14,8 +12,6 @@ refit_OLS = function(Y_list, subsetted_XtX, X, k, L_list, indices_list, dataset_
   refitted_Beta = matrix(nrow = p, ncol = q)
 
   for (i in 1:q) {
-
-    # print(i)
 
     coefficients = numeric(p)
 

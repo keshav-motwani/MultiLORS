@@ -96,6 +96,8 @@ fit_glmnet = function(Y_list,
 #' @param X_list_validation
 #' @param indices_list_validation
 #'
+#' @importFrom parallel mclapply
+#'
 #' @return
 #' @export
 refit_glmnet = function(fit,
@@ -121,7 +123,7 @@ refit_glmnet = function(fit,
 
   subsetted_XtX = lapply(1:q, function(i) crossprod(X[k %in% dataset_indices_list[[i]], , drop = FALSE]))
 
-  refit_Betas = parallel::mclapply(
+  refit_Betas = mclapply(
     fit$model_fits,
     function(model) {
       refit_OLS(Y_list, subsetted_XtX, X, k, NULL, indices_list, dataset_indices_list, model$Beta)
