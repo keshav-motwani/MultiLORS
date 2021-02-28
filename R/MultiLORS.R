@@ -1,4 +1,4 @@
-#' Fit LORS model
+#' Fit MultiLORS model
 #'
 #' @param Y_list
 #' @param X_list
@@ -26,19 +26,19 @@ MultiLORS = function(Y_list,
                      Y_list_validation = NULL,
                      X_list_validation = NULL,
                      indices_list_validation = NULL,
+                     standardize_Y = FALSE,
+                     standardize_X = TRUE,
+                     gamma_method = 1,
                      n_lambda = 20,
                      n_gamma = 20,
                      lambda_min_ratio = 0.001,
                      gamma_min_ratio = 0.001,
-                     standardize_Y = FALSE,
-                     standardize_X = TRUE,
                      n_iter = 1000,
                      tolerance = 1e-6,
                      early_stopping = TRUE,
                      verbose = 0,
                      return_L = TRUE,
                      n_cores = 1) {
-
 
   p = ncol(X_list[[1]])
   q = max(unlist(indices_list))
@@ -75,8 +75,14 @@ MultiLORS = function(Y_list,
     X_list_validation = lapply(X_list_validation, function(k) cbind(1, k))
   }
 
-  gamma_weights = compute_gamma_weights(Y_list)
-  gamma_sequence = compute_candidate_gamma_sequence(n_gamma, gamma_min_ratio)
+  if (gamma_method == 1) {
+    gamma_weights = compute_gamma_weights_1(Y_list)
+    gamma_sequence = compute_candidate_gamma_sequence_1(n_gamma, gamma_min_ratio)
+  } else if (gamma_method == 2) {
+    gamma_weights = compute_gamma_weights_2(Y_list)
+    gamma_sequence = compute_candidate_gamma_sequence_2(Y_list, n_gamma, gamma_min_ratio)
+  }
+
   lambda_grid = compute_candidate_lambda_grid(Y_list, X_list, q, indices_list, XtY_list, gamma_weights, gamma_sequence, n_lambda, lambda_min_ratio)
 
   s_Beta = compute_s_Beta(XtX_list, p, q, dataset_indices_list)

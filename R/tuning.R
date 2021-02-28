@@ -51,7 +51,7 @@ compute_tuning_performance = function(fit, Y_list, X_list, indices_list, Y_list_
 
 }
 
-compute_gamma_weights = function(Y_list) {
+compute_gamma_weights_1 = function(Y_list) {
 
   weights = sapply(Y_list, function(k) svd(k)$d[1])
 
@@ -59,9 +59,29 @@ compute_gamma_weights = function(Y_list) {
 
 }
 
-compute_candidate_gamma_sequence = function(n_gamma, min_ratio) {
+# sqrt(q) + sqrt(n_k)
+
+compute_candidate_gamma_sequence_1 = function(n_gamma, min_ratio) {
 
   gamma = log_seq(1, min_ratio, n_gamma)
+
+  return(gamma)
+
+}
+
+compute_gamma_weights_2 = function(Y_list) {
+
+  weights = sapply(Y_list, function(Y) sqrt(nrow(Y)) + sqrt(ncol(Y)))
+
+  return(weights)
+
+}
+
+compute_candidate_gamma_sequence_2 = function(Y_list, n_gamma, min_ratio) {
+
+  max = max(sapply(Y_list, function(Y) svd(Y)$d[1] / (sqrt(nrow(Y)) + sqrt(ncol(Y)))))
+
+  gamma = log_seq(max, min_ratio, n_gamma)
 
   return(gamma)
 
