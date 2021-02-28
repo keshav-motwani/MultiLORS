@@ -73,6 +73,7 @@ fit = function(Y_list,
 fit_solution_path = function(Y_list,
                              X_list,
                              indices_list,
+                             Y_list_unstd,
                              Y_list_validation,
                              X_list_validation,
                              indices_list_validation,
@@ -140,7 +141,7 @@ fit_solution_path = function(Y_list,
 
     if (!is.null(Y_list_validation) & extra_iter > 0) {
 
-      avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, adjusted_Beta)
+      avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list_unstd, indices_list, adjusted_Beta)
 
       if (avg_validation_R2 > extra_iter_threshold) {
 
@@ -189,12 +190,12 @@ fit_solution_path = function(Y_list,
     if (!is.null(Y_list_validation)) {
 
       validation_error = compute_error(Y_list_validation, X_list_validation, indices_list_validation, adjusted_Beta)
-      avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, adjusted_Beta)
+      avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list_unstd, indices_list, adjusted_Beta)
 
       min_validation_error = min(min_validation_error, validation_error)
       max_avg_validation_R2 = max(max_avg_validation_R2, avg_validation_R2)
 
-      model$performance$validation$R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, adjusted_Beta)
+      model$performance$validation$R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list_unstd, indices_list, adjusted_Beta)
       model$performance$validation$correlation  = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, adjusted_Beta)
 
       if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda, " --- Validation Error: ", validation_error, "; Avg Validation R2: ", avg_validation_R2))
