@@ -59,38 +59,37 @@ double l1_penalty(const arma::mat & Beta, double lambda) {
 
 }
 
+// // [[Rcpp::export]]
+// double nuclear_norm_penalty(const List & L_list, double gamma, const arma::vec & gamma_weights) {
+//
+//   R_xlen_t K = L_list.size();
+//
+//   double penalty = 0;
+//
+//   for (R_xlen_t i = 0; i < K; i++) {
+//
+//     NumericMatrix L = L_list[i];
+//
+//     arma::mat L_(L.begin(), L.nrow(), L.ncol(), false);
+//
+//     arma::mat U, V;
+//     arma::vec d;
+//     arma::svd_econ(U, d, V, L_, "right");
+//
+//     penalty += arma::accu(d) * gamma * gamma_weights[i];
+//
+//   }
+//
+//   return penalty;
+//
+// }
+
 // [[Rcpp::export]]
-double nuclear_norm_penalty(const List & L_list, double gamma, const arma::vec & gamma_weights) {
-
-  R_xlen_t K = L_list.size();
-
-  double penalty = 0;
-
-  for (R_xlen_t i = 0; i < K; i++) {
-
-    NumericMatrix L = L_list[i];
-
-    arma::mat L_(L.begin(), L.nrow(), L.ncol(), false);
-
-    arma::mat U, V;
-    arma::vec d;
-    arma::svd_econ(U, d, V, L_, "right");
-
-    penalty += arma::accu(d) * gamma * gamma_weights[i];
-
-  }
-
-  return penalty;
-
-}
-
-// [[Rcpp::export]]
-double evaluate_objective(const List & Y_list, const List & X_list, const List & L_list, const List & indices_list, const arma::mat & Beta, double lambda, double gamma, const arma::vec & gamma_weights) {
+double evaluate_objective(const List & Y_list, const List & X_list, const List & L_list, const List & indices_list, const arma::mat & Beta, double lambda, double nuclear_norm_penalty) {
 
   double g = evaluate_g(Y_list, X_list, L_list, indices_list, Beta);
   double l1 = l1_penalty(Beta, lambda);
-  double nuclear = nuclear_norm_penalty(L_list, gamma, gamma_weights);
 
-  return g + l1 + nuclear;
+  return g + l1 + nuclear_norm_penalty;
 
 }

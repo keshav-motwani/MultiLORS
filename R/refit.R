@@ -1,9 +1,7 @@
 refit_OLS = function(Y_list, subsetted_XtX, X, k, L_list, indices_list, dataset_indices_list, Beta) {
 
   if (!is.null(L_list)) {
-    Y_list = mapply(Y = Y_list, L = L_list, FUN = function(Y, L) {
-      Y - L$u %*% diag(x = L$d, nrow = length(L$d)) %*% t(L$v)
-    }, SIMPLIFY = FALSE)
+    Y_list = mapply(`-`, Y = Y_list, L = L_list, SIMPLIFY = FALSE)
   }
 
   p = nrow(Beta)

@@ -19,7 +19,7 @@ arma::mat l1_prox(const arma::mat & matrix, double lambda) {
 }
 
 // [[Rcpp::export]]
-arma::mat nuclear_prox(const arma::mat & matrix, double gamma) {
+List nuclear_prox(const arma::mat & matrix, double gamma) {
 
   arma::mat U, V;
   arma::vec d;
@@ -28,6 +28,13 @@ arma::mat nuclear_prox(const arma::mat & matrix, double gamma) {
   arma::vec zero(d.size());
   zero.zeros();
 
-  return U * arma::diagmat(arma::max(d - gamma, zero)) * V.t();
+  d = arma::max(d - gamma, zero);
+
+  arma::mat L =  U * arma::diagmat(d) * V.t();
+
+  double nuclear_norm_penalty = gamma * arma::accu(d);
+
+  return List::create(Named("L") = wrap(L),
+                      Named("nuclear_norm_penalty") = wrap(nuclear_norm_penalty));
 
 }

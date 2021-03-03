@@ -19,39 +19,51 @@ fit = function(Y_list,
 
   for (iter in 1:n_iter) {
 
-    L_list_new = update_L(Y_list = Y_list,
+    L_update = update_L(Y_list = Y_list,
                           X_list = X_list,
                           indices_list = indices_list,
                           Beta = Beta_old,
                           gamma_weights = gamma_weights,
                           gamma = gamma)
-    objective[2 * iter - 1] = evaluate_objective(Y_list, X_list, L_list_new, indices_list, Beta_old, lambda, gamma, gamma_weights)
+    L_list_new = L_update$L
+
+    objective[2 * iter - 1] = evaluate_objective(Y_list, X_list, L_list_new, indices_list, Beta_old, lambda, L_update$nuclear_norm_penalty)
 
     Beta_new = update_Beta(Y_list = Y_list,
-                              X_list = X_list,
-                              L_list = L_list_new,
-                              q = q,
-                              indices_list = indices_list,
-                              XtX_list = XtX_list,
-                              XtY_list = XtY_list,
-                              Beta_old = Beta_old,
-                              lambda = lambda,
-                              s_Beta = s_Beta,
-                              s = s)
-    objective[2 * iter] = evaluate_objective(Y_list, X_list, L_list_new, indices_list, Beta_new, lambda, gamma, gamma_weights)
+                           X_list = X_list,
+                           L_list = L_list_new,
+                           q = q,
+                           indices_list = indices_list,
+                           XtX_list = XtX_list,
+                           XtY_list = XtY_list,
+                           Beta_old = Beta_old,
+                           lambda = lambda,
+                           s_Beta = s_Beta,
+                           s = s)
+
+    objective[2 * iter] = evaluate_objective(Y_list, X_list, L_list_new, indices_list, Beta_new, lambda, L_update$nuclear_norm_penalty)
 
     last_step = objective[2 * (iter - 1)]
     this_step = objective[2 * iter]
 
     if (verbose == 2) print(paste0("Iteration ", iter, ": ", this_step))
 
-    if (iter > 1 && (last_step - this_step)/last_step < tolerance) {
+    diff = (last_step - this_step)/last_step
+
+    if (iter > 1 && diff < tolerance) {
       break
     }
 
     Beta_old = Beta_new
 
   }
+
+  L_list_new = update_L(Y_list = Y_list,
+                        X_list = X_list,
+                        indices_list = indices_list,
+                        Beta = Beta_new,
+                        gamma_weights = gamma_weights,
+                        gamma = gamma)$L
 
   if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda, " --- # of iterations: ", iter, "; difference = ", round((last_step - this_step)/last_step, 10)))
 
@@ -63,7 +75,8 @@ fit = function(Y_list,
     objective = objective,
     n_iter = iter,
     lambda = lambda,
-    gamma = gamma
+    gamma = gamma,
+    diff = diff
   )
 
   return(result)
@@ -139,7 +152,7 @@ fit_solution_path = function(Y_list,
 
     adjusted_L_list = adjust_L(model$L_list, indices_list, Y_sd)
 
-    if (!is.null(Y_list_validation) & extra_iter > 0) {
+    if (!is.null(Y_list_validation) & extra_iter > 0 & model$diff > tolerance) {
 
       avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list_unstd, indices_list, adjusted_Beta)
 
@@ -205,7 +218,7 @@ fit_solution_path = function(Y_list,
     model$Beta = as(adjusted_Beta, "dgCMatrix")
 
     if (return_L) {
-      model$L_list = compress_L(adjusted_L_list)
+      model$L_list = adjusted_L_list
     } else {
       model$L_list = NULL
     }

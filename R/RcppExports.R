@@ -29,12 +29,8 @@ l1_penalty <- function(Beta, lambda) {
     .Call(`_MultiLORS_l1_penalty`, Beta, lambda)
 }
 
-nuclear_norm_penalty <- function(L_list, gamma, gamma_weights) {
-    .Call(`_MultiLORS_nuclear_norm_penalty`, L_list, gamma, gamma_weights)
-}
-
-evaluate_objective <- function(Y_list, X_list, L_list, indices_list, Beta, lambda, gamma, gamma_weights) {
-    .Call(`_MultiLORS_evaluate_objective`, Y_list, X_list, L_list, indices_list, Beta, lambda, gamma, gamma_weights)
+evaluate_objective <- function(Y_list, X_list, L_list, indices_list, Beta, lambda, nuclear_norm_penalty) {
+    .Call(`_MultiLORS_evaluate_objective`, Y_list, X_list, L_list, indices_list, Beta, lambda, nuclear_norm_penalty)
 }
 
 l1_prox <- function(matrix, lambda) {

@@ -139,7 +139,8 @@ MultiLORS = function(Y_list,
     validation = NULL
   }
 
-  fit = c(fit, list(tuning = list(train = train, validation = validation)))
+  fit = c(fit, list(tuning = list(train = train, validation = validation),
+                    standardization = list(X_mean = X_mean, X_sd = X_sd, Y_sd = Y_sd)))
 
   return(fit)
 

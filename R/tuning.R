@@ -101,7 +101,7 @@ compute_candidate_lambda_sequence_fixed_gamma = function(Y_list, X_list, q, indi
 
     gamma_k = gamma_weights[[k]] * gamma
 
-    L_k = nuclear_prox(Y_list[[k]], gamma_k)
+    L_k = nuclear_prox(Y_list[[k]], gamma_k)$L
 
     result[, indices_list[[k]]] = result[, indices_list[[k]]] + crossprod(X_list[[k]], L_k) - XtY_list[[k]]
 
