@@ -70,3 +70,48 @@ plot_actual_vs_predicted = function(Y_list, X_list, indices_list, Beta, annotati
   return(plot)
 
 }
+
+plot_L = function(L_list, metadata_list, color, columns = 1:2) {
+
+  stopifnot(length(color) == 1)
+  stopifnot(length(columns) == 2)
+
+  if (is.null(names(L_list))) {
+    names(L_list) = paste0("dataset_", 1:length(L_list))
+  }
+
+  columns = 3:4
+
+  plot_data = do.call(rbind, mapply(L_list, metadata_list, names(L_list), FUN = function(L, metadata, name) {
+    data = data.frame(L$u[, columns] %*% diag(L$d[columns]), metadata[, color], name)
+    colnames(data) = c(paste0("L_", columns), color, "dataset")
+    data
+  }, SIMPLIFY = FALSE))
+
+  ggplot(plot_data, aes_string(x = colnames(plot_data)[1], y = colnames(plot_data)[2], color = colnames(plot_data)[3])) + geom_point(size = 0.25) + facet_wrap(~dataset, scales = "free") + theme_classic() +
+    theme(strip.background = element_blank(), strip.placement = "outside") + facet_wrap(~dataset, ncol = 3, scales = "fixed")
+
+
+  ggplot(plot_data, aes_string(x = colnames(plot_data)[1], y = colnames(plot_data)[2], color = colnames(plot_data)[3])) + geom_point(size = 0.25) + facet_wrap(~dataset, scales = "free") + theme_classic() +
+    theme(strip.background = element_blank(), strip.placement = "outside")
+
+}
+
+plot_L_density = function(L_list, metadata_list, color, columns = 1:5) {
+
+  stopifnot(length(color) == 1)
+
+  if (is.null(names(L_list))) {
+    names(L_list) = paste0("dataset_", 1:length(L_list))
+  }
+
+  plot_data = do.call(rbind, lapply(columns, function(column) do.call(rbind, mapply(L_list, metadata_list, names(L_list), FUN = function(L, metadata, name) {
+    data = data.frame(L$u[, column], paste0("L_", column), metadata[, color], name)
+    colnames(data) = c("L", "column", "color", "dataset")
+    data
+  }, SIMPLIFY = FALSE))))
+
+  ggplot(plot_data, aes_string(x = "L", y = "column", color = "column")) + ggridges::geom_density_ridges2() + facet_grid(color~dataset) + theme_classic() +
+    theme(strip.background = element_blank(), strip.placement = "outside")
+
+}

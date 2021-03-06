@@ -1,6 +1,6 @@
 library(MultiLORS)
 
-set.seed(1, kind = "Mersenne-Twister", normal.kind = "Inversion", sample.kind = "Rejection")
+set.seed(5, kind = "Mersenne-Twister", normal.kind = "Inversion", sample.kind = "Rejection")
 
 n_k = c(50, 100, 100, 200, 300)
 p = 50
@@ -8,7 +8,7 @@ q = 5
 theta = rep(100, 2)
 Sigma = diag(1, nrow = q, ncol = q)
 sparsity = 0.9
-R2 = 0.75
+R2 = 0.3
 mean = 5
 
 X = simulate_X_list(n_k, p, mean)
@@ -32,7 +32,6 @@ Y_test = compute_Y_list(X_test, Beta, L_test, E_test)
 indices_test = replicate(5, 1:q, simplify = FALSE)
 
 set.seed(Sys.time()) # results should be same regardless of seed
-
 print(system.time({MultiLORS_1_fit = MultiLORS(Y, X, indices, Y_val, X_val, indices_val, verbose = 0, n_iter = 250, n_cores = 4, early_stopping = FALSE, standardize_Y = TRUE, gamma_method = 1)}))
 print(system.time({MultiLORS_1_refit = refit_MultiLORS(MultiLORS_1_fit, Y, X, indices, Y_val, X_val, indices_val, n_cores = 1)}))
 print(system.time({MultiLORS_2_fit = MultiLORS(Y, X, indices, Y_val, X_val, indices_val, verbose = 0, n_iter = 250, n_cores = 4, early_stopping = FALSE, standardize_Y = TRUE, gamma_method = 2)}))
