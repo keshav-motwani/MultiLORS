@@ -187,7 +187,12 @@ refit_MultiLORS = function(fit,
     fit$model_fits,
     function(solution_path) {
       lapply(solution_path, function(model) {
-        refit_OLS(Y_list, subsetted_XtX, X, k, model$L_list, indices_list, dataset_indices_list, model$Beta)
+        if (is.null(model$L_list)) {
+          L_list = recompute_L(fit, Y_list, X_list, indices_list, model$gamma_index, model$lambda_index)
+        } else {
+          L_list = NULL
+        }
+        refit_OLS(Y_list, subsetted_XtX, X, k, L_list, indices_list, dataset_indices_list, model$Beta)
       })
     },
   mc.cores = n_cores)
