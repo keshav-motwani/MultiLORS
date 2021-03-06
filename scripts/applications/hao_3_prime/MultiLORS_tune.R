@@ -5,9 +5,9 @@ Y_list = data$Y_list
 X_list = data$X_list
 metadata_list = data$metadata_list
 
-train_data = names(hao_3_prime_split)[1:9]
-validation_data = names(hao_3_prime_split)[10:12]
-test_data = names(hao_3_prime_split)[13:24]
+train_data = 1:9
+validation_data = 10:12
+test_data = 13:24
 
 prepared_train = prepare_Y_and_indices_train(Y_list[train_data])
 prepared_validation = prepare_Y_and_indices_test(Y_list[validation_data], prepared_train$indices_list)
