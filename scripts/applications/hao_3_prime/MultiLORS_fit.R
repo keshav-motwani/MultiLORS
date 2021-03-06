@@ -1,3 +1,5 @@
+library(MultiLORS)
+
 result_path = "results/applications/hao_3_prime/"
 
 data = readRDS(file.path(result_path, "data.rds"))
