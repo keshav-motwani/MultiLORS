@@ -10,16 +10,14 @@ fit = function(Y_list,
                Beta_old,
                s_Beta,
                n_iter,
-               extra_iter,
-               extra_iter_threshold,
                tolerance,
                verbose) {
 
-  objective = numeric(2 * (n_iter + extra_iter))
+  objective = numeric(2 * n_iter)
 
   s = s_Beta * 100
 
-  for (iter in 1:(n_iter + extra_iter)) {
+  for (iter in 1:n_iter) {
 
     L_update = update_L(Y_list = Y_list,
                           X_list = X_list,
@@ -54,11 +52,6 @@ fit = function(Y_list,
 
     if (iter > 1 && diff < tolerance) {
       break
-    }
-
-    if (extra_iter > 0 && iter == n_iter) {
-      avg_R2 = compute_avg_R2(Y_list, X_list, indices_list, Y_list, indices_list, Beta_new)
-      if (avg_R2 < extra_iter_threshold) break
     }
 
     Beta_old = Beta_new
@@ -144,8 +137,6 @@ fit_solution_path = function(Y_list,
       Beta_old = Beta_old,
       s_Beta = s_Beta,
       n_iter = n_iter,
-      extra_iter = extra_iter,
-      extra_iter_threshold = extra_iter_threshold,
       tolerance = tolerance,
       verbose = verbose
     )
@@ -160,6 +151,49 @@ fit_solution_path = function(Y_list,
     if (!is.null(colnames(X_list[[1]]))) rownames(adjusted_Beta) = colnames(X_list[[1]])
 
     adjusted_L_list = adjust_L(model$L_list, indices_list, Y_sd)
+
+    if (!is.null(Y_list_validation) & extra_iter > 0 & model$diff > tolerance) {
+
+      avg_validation_R2 = compute_avg_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list_unstd, indices_list, adjusted_Beta)
+
+      if (avg_validation_R2 > extra_iter_threshold) {
+
+        extra_model = fit(
+          Y_list = Y_list,
+          X_list = X_list,
+          q = q,
+          indices_list = indices_list,
+          XtX_list = XtX_list,
+          XtY_list = XtY_list,
+          lambda = lambda_grid[gamma, lambda],
+          gamma = gamma_sequence[gamma],
+          gamma_weights = gamma_weights,
+          Beta_old = Beta_old,
+          s_Beta = s_Beta,
+          n_iter = extra_iter,
+          tolerance = tolerance,
+          verbose = verbose
+        )
+
+        extra_model$objective = c(model$objective, extra_model$objective)
+        extra_model$n_iter = model$n_iter + extra_model$n_iter
+
+        extra_model$lambda_index = lambda
+        extra_model$gamma_index = gamma
+
+        model = extra_model
+
+        Beta_old = model$Beta
+
+        adjusted_Beta = adjust_Beta(model$Beta, X_mean, X_sd, Y_sd)
+        colnames(adjusted_Beta) = attr(indices_list, "responses")
+        if (!is.null(colnames(X_list[[1]]))) rownames(adjusted_Beta) = colnames(X_list[[1]])
+
+        adjusted_L_list = adjust_L(model$L_list, indices_list, Y_sd)
+
+      }
+
+    }
 
     model$performance = list(train = list(), validation = list())
 
