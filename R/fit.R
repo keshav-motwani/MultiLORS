@@ -91,8 +91,7 @@ fit_solution_path = function(Y_list,
                              X_list_validation,
                              indices_list_validation,
                              standardize,
-                             n_lambda,
-                             n_gamma,
+                             lambda_indices,
                              n_iter,
                              tolerance,
                              extra_iter,
@@ -120,7 +119,7 @@ fit_solution_path = function(Y_list,
   min_validation_error = Inf
   max_avg_validation_R2 = 0
 
-  for (lambda in 1:n_lambda) {
+  for (lambda in lambda_indices) {
 
     if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda))
 
@@ -227,7 +226,7 @@ fit_solution_path = function(Y_list,
 
     if (early_stopping && !is.null(Y_list_validation)) {
       if (lambda > 5 &&
-          lambda > n_lambda / 4 &&
+          lambda > max(lambda_indices) / 4 &&
           validation_error > min_validation_error * 1.01 &&
           avg_validation_R2 < max_avg_validation_R2 * 0.99) {
         break

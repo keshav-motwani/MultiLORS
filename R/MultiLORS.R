@@ -33,6 +33,8 @@ MultiLORS = function(Y_list,
                      n_gamma = 20,
                      lambda_min_ratio = 0.001,
                      gamma_min_ratio = 0.001,
+                     lambda_indices = 1:n_lambda,
+                     gamma_indices = 1:n_gamma,
                      n_iter = 1000,
                      tolerance = 1e-6,
                      extra_iter = 0,
@@ -89,7 +91,7 @@ MultiLORS = function(Y_list,
 
   s_Beta = compute_s_Beta(XtX_list, p, q, dataset_indices_list)
 
-  model_fits = mclapply(1:n_gamma, function(gamma) {
+  model_fits = mclapply(gamma_indices, function(gamma) {
     fit_solution_path(
       Y_list,
       X_list,
@@ -99,8 +101,7 @@ MultiLORS = function(Y_list,
       X_list_validation,
       indices_list_validation,
       standardize,
-      n_lambda,
-      n_gamma,
+      lambda_indices,
       n_iter,
       tolerance,
       extra_iter,
