@@ -1,7 +1,7 @@
 library(tidyverse)
 library(patchwork)
 
-RESULT_PATH = "results/simulations"
+RESULT_PATH = "results/simulations_new"
 
 files = list.files(RESULT_PATH, full.names = TRUE)
 files = files[grepl("rds", files)]
