@@ -184,7 +184,7 @@ fit_model_MultiLORS = function(data) {
     data$validation$subsetted$Y_list,
     data$validation$subsetted$X_list,
     data$validation$subsetted$indices_list,
-    verbose = FALSE,
+    verbose = 1,
     n_iter = 1000,
     tolerance = 1e-6
   )
@@ -199,7 +199,7 @@ fit_model_glmnet = function(data) {
              data$train$subsetted$indices_list,
              data$validation$subsetted$Y_list,
              data$validation$subsetted$X_list,
-             data$validation$subsetted$indices_list)
+             data$validation$subsetted$indices_list)$best_Beta
 
   return(list(Beta = Beta))
 
@@ -214,7 +214,7 @@ fit_model_ORC_ALL_MultiLORS = function(data) {
     data$validation$full$Y_list,
     data$validation$full$X_list,
     data$validation$full$indices_list,
-    verbose = FALSE,
+    verbose = 1,
     n_iter = 1000,
     tolerance = 1e-6
   )$best_Beta
@@ -230,7 +230,7 @@ fit_model_ORC_L_glmnet = function(data) {
              data$train$subsetted$indices_list,
              mapply(x = data$validation$subsetted$Y_list, y = data$validation$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
              data$validation$subsetted$X_list,
-             data$validation$subsetted$indices_list)
+             data$validation$subsetted$indices_list)$best_Beta
 
   return(list(Beta = Beta))
 
@@ -245,7 +245,7 @@ fit_model_ORC_L_MultiLORS = function(data) {
     mapply(x = data$validation$subsetted$Y_list, y = data$validation$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
     data$validation$subsetted$X_list,
     data$validation$subsetted$indices_list,
-    verbose = FALSE,
+    verbose = 1,
     n_iter = 1000,
     tolerance = 1e-6
   )$best_Beta
@@ -261,7 +261,7 @@ fit_model_ORC_ALL_glmnet = function(data) {
                     data$train$full$indices_list,
                     data$validation$full$Y_list,
                     data$validation$full$X_list,
-                    data$validation$full$indices_list)
+                    data$validation$full$indices_list)$best_Beta
 
   return(list(Beta = Beta))
 
@@ -274,7 +274,7 @@ fit_model_ORC_L_ALL_glmnet = function(data) {
              data$train$full$indices_list,
              mapply(x = data$validation$full$Y_list, y = data$validation$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
              data$validation$full$X_list,
-             data$validation$full$indices_list)
+             data$validation$full$indices_list)$best_Beta
 
   return(list(Beta = Beta))
 
@@ -289,7 +289,7 @@ fit_model_ORC_L_ALL_MultiLORS = function(data) {
     mapply(x = data$validation$full$Y_list, y = data$validation$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
     data$validation$full$X_list,
     data$validation$full$indices_list,
-    verbose = FALSE,
+    verbose = 1,
     n_iter = 1000,
     tolerance = 1e-6
   )$best_Beta
