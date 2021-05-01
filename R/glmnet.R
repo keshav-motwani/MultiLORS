@@ -201,8 +201,7 @@ compute_tuning_performance_glmnet = function(fit, Y_list, X_list, indices_list, 
   }
 
   return(list(SSE = SSE,
-              avg_R2 = avg_R2,
-              avg_correlation = avg_correlation))
+              avg_R2 = avg_R2))
 
 }
 
