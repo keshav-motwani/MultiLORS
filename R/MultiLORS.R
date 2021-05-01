@@ -26,7 +26,7 @@ MultiLORS = function(Y_list,
                      Y_list_validation = NULL,
                      X_list_validation = NULL,
                      indices_list_validation = NULL,
-                     standardize_Y = TRUE,
+                     standardize_Y = FALSE,
                      standardize_X = TRUE,
                      gamma_method = 1,
                      n_lambda = 20,
@@ -39,9 +39,9 @@ MultiLORS = function(Y_list,
                      tolerance = 1e-6,
                      extra_iter = 0,
                      extra_iter_threshold = 0,
-                     early_stopping = TRUE,
+                     early_stopping = FALSE,
                      verbose = 0,
-                     return_L = TRUE,
+                     return_L = FALSE,
                      n_cores = 1) {
 
   p = ncol(X_list[[1]])
@@ -136,6 +136,8 @@ MultiLORS = function(Y_list,
 
   if (!is.null(X_list_validation)) {
     validation = compute_tuning_performance(fit, Y_list_validation, X_list_validation, indices_list_validation, Y_list_unstd, indices_list)
+    tuning_parameters = which_min(validation$SSE)
+    fit$best_Beta = model_fits[[tuning_parameters[1]]][[tuning_parameters[2]]]$Beta
   } else {
     validation = NULL
   }
