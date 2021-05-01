@@ -21,8 +21,8 @@ defaults = list(
 )
 
 considered_values = list(
-  R2 = seq(from = 0.5, to = 0.9, by = 0.05),
   r = 2:15,
+  R2 = seq(from = 0.5, to = 0.9, by = 0.05),
   theta = seq(from = 10, to = 100, by = 10)
 )
 
