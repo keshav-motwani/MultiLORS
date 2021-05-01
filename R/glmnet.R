@@ -188,7 +188,7 @@ compute_tuning_performance_glmnet = function(fit, Y_list, X_list, indices_list, 
 
   SSE = numeric(n_lambda)
   avg_R2 = numeric(n_lambda)
-  avg_correlation = numeric(n_lambda)
+  # avg_correlation = numeric(n_lambda)
 
   for (i in 1:length(fit$model_fits)) {
 
@@ -196,7 +196,7 @@ compute_tuning_performance_glmnet = function(fit, Y_list, X_list, indices_list, 
 
       SSE[i] = compute_error(Y_list, X_list, indices_list, Beta)
       avg_R2[i] = compute_avg_R2(Y_list, X_list, indices_list, Y_list_train, indices_list_train, Beta)
-      avg_correlation[i] = compute_avg_correlation(Y_list, X_list, indices_list, Beta)
+      # avg_correlation[i] = compute_avg_correlation(Y_list, X_list, indices_list, Beta)
 
   }
 
