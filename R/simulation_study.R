@@ -189,10 +189,7 @@ fit_model_MultiLORS = function(data) {
     tolerance = 1e-6
   )
 
-  Y_mean = compute_Y_mean(data$train$subsetted$Y_list,
-                          data$train$subsetted$indices_list)
-
-  return(list(Beta = fit$best_Beta, Y_mean = Y_mean))
+  return(list(Beta = fit$best_Beta))
 }
 
 fit_model_glmnet = function(data) {
@@ -204,10 +201,7 @@ fit_model_glmnet = function(data) {
              data$validation$subsetted$X_list,
              data$validation$subsetted$indices_list)
 
-  Y_mean = compute_Y_mean(data$train$subsetted$Y_list,
-                          data$train$subsetted$indices_list)
-
-  return(list(Beta = Beta, Y_mean = Y_mean))
+  return(list(Beta = Beta))
 
 }
 
@@ -242,6 +236,24 @@ fit_model_ORC_L_glmnet = function(data) {
 
 }
 
+fit_model_ORC_L_MultiLORS = function(data) {
+
+  Beta = MultiLORS(
+    mapply(x = data$train$subsetted$Y_list, y = data$train$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
+    data$train$subsetted$X_list,
+    data$train$subsetted$indices_list,
+    mapply(x = data$validation$subsetted$Y_list, y = data$validation$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
+    data$validation$subsetted$X_list,
+    data$validation$subsetted$indices_list,
+    verbose = FALSE,
+    n_iter = 1000,
+    tolerance = 1e-6
+  )$best_Beta
+
+  return(list(Beta = Beta))
+
+}
+
 fit_model_ORC_ALL_glmnet = function(data) {
 
   Beta = fit_glmnet(data$train$full$Y_list,
@@ -263,6 +275,24 @@ fit_model_ORC_L_ALL_glmnet = function(data) {
              mapply(x = data$validation$full$Y_list, y = data$validation$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
              data$validation$full$X_list,
              data$validation$full$indices_list)
+
+  return(list(Beta = Beta))
+
+}
+
+fit_model_ORC_L_ALL_MultiLORS = function(data) {
+
+  Beta = MultiLORS(
+    mapply(x = data$train$full$Y_list, y = data$train$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
+    data$train$full$X_list,
+    data$train$full$indices_list,
+    mapply(x = data$validation$full$Y_list, y = data$validation$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
+    data$validation$full$X_list,
+    data$validation$full$indices_list,
+    verbose = FALSE,
+    n_iter = 1000,
+    tolerance = 1e-6
+  )$best_Beta
 
   return(list(Beta = Beta))
 
