@@ -34,7 +34,7 @@ for (i in 1:length(methods)) {
 
   current_parameters = parameters[[ARRAY_ID * length(methods) + i]]
 
-  result = evaluate_current_parameters(current_parameters)
+  result = evaluate_parameters(current_parameters)
   saveRDS(result, file.path(RESULT_PATH, paste0(current_parameters$experiment, "_", gsub(".", "_", current_parameters[[current_parameters$experiment]], fixed = TRUE), "_", current_parameters$method, "_", current_parameters$replicate, ".rds")))
 
 }
