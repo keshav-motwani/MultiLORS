@@ -12,4 +12,4 @@
 
 ml R
 
-Rscript scripts/simulation_runner.R
+Rscript scripts/simulations/simulation_runner.R
