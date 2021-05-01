@@ -78,13 +78,13 @@ generate_simulation_data = function(R2,
     SIMPLIFY = FALSE
   )
 
-  D_full = diag(1, nrow = q, ncol = q)
+  indices_full = 1:q
 
   names = c("train", "validation", "test")
   output = lapply(names,
                   function(name)
                     list(
-                      full = format_simulation_output_full(Y[[name]], X[[name]], L[[name]], E[[name]], D_full),
+                      full = format_simulation_output_full(Y[[name]], X[[name]], L[[name]], E[[name]], indices_full),
                       subsetted = format_simulation_output_subsetted(subsetted[[name]], X[[name]])
                     ))
   names(output) = names
@@ -95,14 +95,14 @@ generate_simulation_data = function(R2,
 
 }
 
-format_simulation_output_full = function(Y_list, X_list, L_list, E_list, D) {
+format_simulation_output_full = function(Y_list, X_list, L_list, E_list, indices) {
 
   return(list(
     Y_list = Y_list,
     X_list = X_list,
     L_list = L_list,
     E_list = E_list,
-    D_list = replicate(length(Y_list), D, simplify = FALSE)
+    indices_list = replicate(length(Y_list), indices, simplify = FALSE)
   ))
 
 }
@@ -168,7 +168,7 @@ evaluate_parameters = function(parameters) {
                                     fit$Beta,
                                     data$test$full$Y_list,
                                     data$test$full$X_list,
-                                    data$test$full$D_list,
+                                    data$test$full$indices_list,
                                     fit$Y_mean)
 
   return(list(parameters = parameters, result = performance))
@@ -180,18 +180,17 @@ fit_model_MultiLORS = function(data) {
   fit = MultiLORS(
     data$train$subsetted$Y_list,
     data$train$subsetted$X_list,
-    data$train$subsetted$D_list,
+    data$train$subsetted$indices_list,
     data$validation$subsetted$Y_list,
     data$validation$subsetted$X_list,
-    data$validation$subsetted$D_list,
+    data$validation$subsetted$indices_list,
     verbose = FALSE,
     n_iter = 1000,
-    tolerance = 1e-6,
-    line_search = TRUE
+    tolerance = 1e-6
   )
 
   Y_mean = compute_Y_mean(data$train$subsetted$Y_list,
-                          data$train$subsetted$D_list)
+                          data$train$subsetted$indices_list)
 
   return(list(Beta = fit$best_Beta, Y_mean = Y_mean))
 }
@@ -200,13 +199,13 @@ fit_model_glmnet = function(data) {
 
   Beta = fit_glmnet(data$train$subsetted$Y_list,
              data$train$subsetted$X_list,
-             data$train$subsetted$D_list,
+             data$train$subsetted$indices_list,
              data$validation$subsetted$Y_list,
              data$validation$subsetted$X_list,
-             data$validation$subsetted$D_list)
+             data$validation$subsetted$indices_list)
 
   Y_mean = compute_Y_mean(data$train$subsetted$Y_list,
-                          data$train$subsetted$D_list)
+                          data$train$subsetted$indices_list)
 
   return(list(Beta = Beta, Y_mean = Y_mean))
 
@@ -217,20 +216,16 @@ fit_model_ORC_ALL_MultiLORS = function(data) {
   Beta = MultiLORS(
     data$train$full$Y_list,
     data$train$full$X_list,
-    data$train$full$D_list,
+    data$train$full$indices_list,
     data$validation$full$Y_list,
     data$validation$full$X_list,
-    data$validation$full$D_list,
+    data$validation$full$indices_list,
     verbose = FALSE,
     n_iter = 1000,
-    tolerance = 1e-6,
-    line_search = TRUE
+    tolerance = 1e-6
   )$best_Beta
 
-  Y_mean = compute_Y_mean(data$train$full$Y_list,
-                          data$train$full$D_list)
-
-  return(list(Beta = Beta, Y_mean = Y_mean))
+  return(list(Beta = Beta))
 
 }
 
@@ -238,15 +233,12 @@ fit_model_ORC_L_glmnet = function(data) {
 
   Beta = fit_glmnet(mapply(x = data$train$subsetted$Y_list, y = data$train$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
              data$train$subsetted$X_list,
-             data$train$subsetted$D_list,
+             data$train$subsetted$indices_list,
              mapply(x = data$validation$subsetted$Y_list, y = data$validation$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
              data$validation$subsetted$X_list,
-             data$validation$subsetted$D_list)
+             data$validation$subsetted$indices_list)
 
-  Y_mean = compute_Y_mean(mapply(x = data$train$subsetted$Y_list, y = data$train$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
-                          data$train$subsetted$D_list)
-
-  return(list(Beta = Beta, Y_mean = Y_mean))
+  return(list(Beta = Beta))
 
 }
 
@@ -254,15 +246,12 @@ fit_model_ORC_ALL_glmnet = function(data) {
 
   Beta = fit_glmnet(data$train$full$Y_list,
                     data$train$full$X_list,
-                    data$train$full$D_list,
+                    data$train$full$indices_list,
                     data$validation$full$Y_list,
                     data$validation$full$X_list,
-                    data$validation$full$D_list)
+                    data$validation$full$indices_list)
 
-  Y_mean = compute_Y_mean(data$train$full$Y_list,
-                          data$train$full$D_list)
-
-  return(list(Beta = Beta, Y_mean = Y_mean))
+  return(list(Beta = Beta))
 
 }
 
@@ -270,25 +259,21 @@ fit_model_ORC_L_ALL_glmnet = function(data) {
 
   Beta = fit_glmnet(mapply(x = data$train$full$Y_list, y = data$train$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
              data$train$full$X_list,
-             data$train$full$D_list,
+             data$train$full$indices_list,
              mapply(x = data$validation$full$Y_list, y = data$validation$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
              data$validation$full$X_list,
-             data$validation$full$D_list)
+             data$validation$full$indices_list)
 
-  Y_mean = compute_Y_mean(mapply(x = data$train$full$Y_list, y = data$train$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
-                          data$train$full$D_list)
-
-  return(list(Beta = Beta, Y_mean = Y_mean))
+  return(list(Beta = Beta))
 
 }
 
-compute_performance = function(Beta, Beta_hat, Y_list_test, X_list_test, D_list_test, Y_mean_train) {
+compute_performance = function(Beta, Beta_hat, Y_list_test, X_list_test, indices_list_test, Y_list_train, indices_list_train) {
 
-  Beta_SSE = error(Beta, Beta_hat)
+  Beta_SSE = sum((Beta - Beta_hat)^2)
 
-  SST = sst(Y_mean_train, Y_list_test, D_list_test)
-  indices_list = lapply(D_list_test, function(x) which(diag(x) == 1))
-  SSE = 2 * evaluate_g(Y_list_test, lapply(X_list_test, function(x) cbind(1, x)), rep(0, length(Y_list_test)), indices_list, Beta_hat)
+  SST = sum(compute_SST(Y_list_test, indices_list_test, Y_list_train, indices_list_train))
+  SSE = sum(compute_SSE(Y_list_test, X_list_test, indices_list_test, Beta_hat))
   R2 = 1 - SSE/SST
 
   return(list(Beta_SSE = Beta_SSE, test_R2 = R2, test_SSE = SSE, test_SST = SST, Beta_hat = Beta_hat, Beta = Beta))

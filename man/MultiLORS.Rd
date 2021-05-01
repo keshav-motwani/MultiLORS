@@ -11,7 +11,7 @@ MultiLORS(
   Y_list_validation = NULL,
   X_list_validation = NULL,
   indices_list_validation = NULL,
-  standardize_Y = TRUE,
+  standardize_Y = FALSE,
   standardize_X = TRUE,
   gamma_method = 1,
   n_lambda = 20,
@@ -24,9 +24,9 @@ MultiLORS(
   tolerance = 1e-06,
   extra_iter = 0,
   extra_iter_threshold = 0,
-  early_stopping = TRUE,
+  early_stopping = FALSE,
   verbose = 0,
-  return_L = TRUE,
+  return_L = FALSE,
   n_cores = 1
 )
 }
