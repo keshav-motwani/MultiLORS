@@ -169,7 +169,8 @@ evaluate_parameters = function(parameters) {
                                     data$test$full$Y_list,
                                     data$test$full$X_list,
                                     data$test$full$indices_list,
-                                    fit$Y_mean)
+                                    fit$Y_list_train,
+                                    fit$indices_list_train)
 
   return(list(parameters = parameters, result = performance))
 
@@ -177,10 +178,13 @@ evaluate_parameters = function(parameters) {
 
 fit_model_MultiLORS = function(data) {
 
+  Y_list_train = data$train$subsetted$Y_list
+  indices_list_train = data$train$subsetted$indices_list
+
   fit = MultiLORS(
-    data$train$subsetted$Y_list,
+    Y_list_train,
     data$train$subsetted$X_list,
-    data$train$subsetted$indices_list,
+    indices_list_train,
     data$validation$subsetted$Y_list,
     data$validation$subsetted$X_list,
     data$validation$subsetted$indices_list,
@@ -189,28 +193,34 @@ fit_model_MultiLORS = function(data) {
     tolerance = 1e-6
   )
 
-  return(list(Beta = fit$best_Beta))
+  return(list(Beta = fit$best_Beta, Y_list_train= Y_list_train, indices_list_train = indices_list_train))
 }
 
 fit_model_glmnet = function(data) {
 
-  Beta = fit_glmnet(data$train$subsetted$Y_list,
+  Y_list_train = data$train$subsetted$Y_list
+  indices_list_train = data$train$subsetted$indices_list
+
+  Beta = fit_glmnet(Y_list_train,
              data$train$subsetted$X_list,
-             data$train$subsetted$indices_list,
+             indices_list_train,
              data$validation$subsetted$Y_list,
              data$validation$subsetted$X_list,
              data$validation$subsetted$indices_list)$best_Beta
 
-  return(list(Beta = Beta))
+  return(list(Beta = Beta, Y_list_train= Y_list_train, indices_list_train = indices_list_train))
 
 }
 
 fit_model_ORC_ALL_MultiLORS = function(data) {
 
+  Y_list_train = data$train$full$Y_list
+  indices_list_train = data$train$full$indices_list
+
   Beta = MultiLORS(
-    data$train$full$Y_list,
+    Y_list_train,
     data$train$full$X_list,
-    data$train$full$indices_list,
+    indices_list_train,
     data$validation$full$Y_list,
     data$validation$full$X_list,
     data$validation$full$indices_list,
@@ -219,29 +229,36 @@ fit_model_ORC_ALL_MultiLORS = function(data) {
     tolerance = 1e-6
   )$best_Beta
 
-  return(list(Beta = Beta))
+  return(list(Beta = Beta, Y_list_train= Y_list_train, indices_list_train = indices_list_train))
 
 }
 
 fit_model_ORC_L_glmnet = function(data) {
 
-  Beta = fit_glmnet(mapply(x = data$train$subsetted$Y_list, y = data$train$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
-             data$train$subsetted$X_list,
+  Y_list_train = mapply(x = data$train$subsetted$Y_list, y = data$train$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE)
+  indices_list_train = data$train$subsetted$indices_list
+
+  Beta = fit_glmnet(Y_list_train,
+                    data$train$subsetted$X_list,
+                    indices_list_train,
              data$train$subsetted$indices_list,
              mapply(x = data$validation$subsetted$Y_list, y = data$validation$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
              data$validation$subsetted$X_list,
              data$validation$subsetted$indices_list)$best_Beta
 
-  return(list(Beta = Beta))
+  return(list(Beta = Beta, Y_list_train= Y_list_train, indices_list_train = indices_list_train))
 
 }
 
 fit_model_ORC_L_MultiLORS = function(data) {
 
+  Y_list_train = mapply(x = data$train$subsetted$Y_list, y = data$train$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE)
+  indices_list_train = data$train$subsetted$indices_list
+
   Beta = MultiLORS(
-    mapply(x = data$train$subsetted$Y_list, y = data$train$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
+    Y_list_train,
     data$train$subsetted$X_list,
-    data$train$subsetted$indices_list,
+    indices_list_train,
     mapply(x = data$validation$subsetted$Y_list, y = data$validation$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
     data$validation$subsetted$X_list,
     data$validation$subsetted$indices_list,
@@ -250,42 +267,51 @@ fit_model_ORC_L_MultiLORS = function(data) {
     tolerance = 1e-6
   )$best_Beta
 
-  return(list(Beta = Beta))
+  return(list(Beta = Beta, Y_list_train = Y_list_train, indices_list_train = data$train$subsetted$indices_list))
 
 }
 
 fit_model_ORC_ALL_glmnet = function(data) {
 
-  Beta = fit_glmnet(data$train$full$Y_list,
+  Y_list_train = data$train$full$Y_list
+  indices_list_train = data$train$full$indices_list
+
+  Beta = fit_glmnet(Y_list_train,
                     data$train$full$X_list,
-                    data$train$full$indices_list,
+                    indices_list_train,
                     data$validation$full$Y_list,
                     data$validation$full$X_list,
                     data$validation$full$indices_list)$best_Beta
 
-  return(list(Beta = Beta))
+  return(list(Beta = Beta, Y_list_train = Y_list_train, indices_list_train = data$train$subsetted$indices_list))
 
 }
 
 fit_model_ORC_L_ALL_glmnet = function(data) {
 
-  Beta = fit_glmnet(mapply(x = data$train$full$Y_list, y = data$train$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
+  Y_list_train = mapply(x = data$train$full$Y_list, y = data$train$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE)
+  indices_list_train = data$train$full$indices_list
+
+  Beta = fit_glmnet(Y_list_train,
              data$train$full$X_list,
-             data$train$full$indices_list,
+             indices_list_train,
              mapply(x = data$validation$full$Y_list, y = data$validation$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
              data$validation$full$X_list,
              data$validation$full$indices_list)$best_Beta
 
-  return(list(Beta = Beta))
+  return(list(Beta = Beta, Y_list_train = Y_list_train, indices_list_train = data$train$subsetted$indices_list))
 
 }
 
 fit_model_ORC_L_ALL_MultiLORS = function(data) {
 
+  Y_list_train = mapply(x = data$train$full$Y_list, y = data$train$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE)
+  indices_list_train = data$train$full$indices_list
+
   Beta = MultiLORS(
-    mapply(x = data$train$full$Y_list, y = data$train$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
+    Y_list_train,
     data$train$full$X_list,
-    data$train$full$indices_list,
+    indices_list_train,
     mapply(x = data$validation$full$Y_list, y = data$validation$full$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
     data$validation$full$X_list,
     data$validation$full$indices_list,
@@ -294,7 +320,7 @@ fit_model_ORC_L_ALL_MultiLORS = function(data) {
     tolerance = 1e-6
   )$best_Beta
 
-  return(list(Beta = Beta))
+  return(list(Beta = Beta, Y_list_train = Y_list_train, indices_list_train = data$train$subsetted$indices_list))
 
 }
 
