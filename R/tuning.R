@@ -24,7 +24,7 @@ compute_tuning_performance = function(fit, Y_list, X_list, indices_list, Y_list_
   n_iter = matrix(NA, ncol = n_lambda, nrow = n_gamma)
   SSE = matrix(NA, ncol = n_lambda, nrow = n_gamma)
   avg_R2 = matrix(NA, ncol = n_lambda, nrow = n_gamma)
-  avg_correlation = matrix(NA, ncol = n_lambda, nrow = n_gamma)
+  # avg_correlation = matrix(NA, ncol = n_lambda, nrow = n_gamma)
 
   for (solution_path in fit$model_fits) {
 
@@ -38,7 +38,7 @@ compute_tuning_performance = function(fit, Y_list, X_list, indices_list, Y_list_
       n_iter[gamma, lambda] = model$n_iter
       SSE[gamma, lambda] = compute_error(Y_list, X_list, indices_list, Beta)
       avg_R2[gamma, lambda] = compute_avg_R2(Y_list, X_list, indices_list, Y_list_train, indices_list_train, Beta)
-      avg_correlation[gamma, lambda] = compute_avg_correlation(Y_list, X_list, indices_list, Beta)
+      # avg_correlation[gamma, lambda] = compute_avg_correlation(Y_list, X_list, indices_list, Beta)
 
     }
 
@@ -46,8 +46,7 @@ compute_tuning_performance = function(fit, Y_list, X_list, indices_list, Y_list_
 
   return(list(n_iter = n_iter,
               SSE = SSE,
-              avg_R2 = avg_R2,
-              avg_correlation = avg_correlation))
+              avg_R2 = avg_R2))
 
 }
 
