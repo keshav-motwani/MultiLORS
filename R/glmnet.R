@@ -77,7 +77,7 @@ fit_glmnet = function(Y_list,
   if (!is.null(X_list_validation)) {
     validation = compute_tuning_performance_glmnet(fit, Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list)
     tuning_parameters = which_min(validation$SSE)
-    fit$best_Beta = model_fits[[tuning_parameters]]$Beta
+    fit$best_Beta = models[[tuning_parameters]]$Beta
   } else {
     validation = NULL
   }

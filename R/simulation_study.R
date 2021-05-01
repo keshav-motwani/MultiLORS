@@ -241,7 +241,6 @@ fit_model_ORC_L_glmnet = function(data) {
   Beta = fit_glmnet(Y_list_train,
                     data$train$subsetted$X_list,
                     indices_list_train,
-             data$train$subsetted$indices_list,
              mapply(x = data$validation$subsetted$Y_list, y = data$validation$subsetted$L_list, function(x, y) x - y, SIMPLIFY = FALSE),
              data$validation$subsetted$X_list,
              data$validation$subsetted$indices_list)$best_Beta
