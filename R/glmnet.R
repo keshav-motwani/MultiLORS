@@ -49,18 +49,18 @@ fit_glmnet = function(Y_list,
     if (!is.null(colnames(X_list[[1]]))) rownames(fit$Beta) = colnames(X_list[[1]])
 
     R2 = compute_R2(Y_list, X_list, indices_list, Y_list, indices_list, fit$Beta)
-    correlation = compute_correlation(Y_list, X_list, indices_list, fit$Beta)
+    # correlation = compute_correlation(Y_list, X_list, indices_list, fit$Beta)
 
     fit$performance$train$R2 = R2
-    fit$performance$train$correlation = correlation
+    # fit$performance$train$correlation = correlation
 
     if (!is.null(Y_list_validation)) {
 
       R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list, fit$Beta)
-      correlation = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, fit$Beta)
+      # correlation = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, fit$Beta)
 
       fit$performance$validation$R2 = R2
-      fit$performance$validation$correlation = correlation
+      # fit$performance$validation$correlation = correlation
 
     }
 
@@ -76,6 +76,8 @@ fit_glmnet = function(Y_list,
 
   if (!is.null(X_list_validation)) {
     validation = compute_tuning_performance_glmnet(fit, Y_list_validation, X_list_validation, indices_list_validation, Y_list, indices_list)
+    tuning_parameters = which_min(validation$SSE)
+    fit$best_Beta = model_fits[[tuning_parameters]]$Beta
   } else {
     validation = NULL
   }

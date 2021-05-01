@@ -197,7 +197,7 @@ fit_solution_path = function(Y_list,
     model$performance = list(train = list(), validation = list())
 
     model$performance$train$R2 = compute_R2(Y_list, X_list, indices_list, Y_list, indices_list, model$Beta)
-    model$performance$train$correlation = compute_correlation(Y_list, X_list, indices_list, model$Beta)
+    # model$performance$train$correlation = compute_correlation(Y_list, X_list, indices_list, model$Beta)
 
     if (!is.null(Y_list_validation)) {
 
@@ -208,7 +208,7 @@ fit_solution_path = function(Y_list,
       max_avg_validation_R2 = max(max_avg_validation_R2, avg_validation_R2)
 
       model$performance$validation$R2 = compute_R2(Y_list_validation, X_list_validation, indices_list_validation, Y_list_unstd, indices_list, adjusted_Beta)
-      model$performance$validation$correlation  = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, adjusted_Beta)
+      # model$performance$validation$correlation  = compute_correlation(Y_list_validation, X_list_validation, indices_list_validation, adjusted_Beta)
 
       if (verbose > 0) print(paste0("gamma: ", gamma, "; lambda: ", lambda, " --- Validation Error: ", validation_error, "; Avg Validation R2: ", avg_validation_R2))
 
