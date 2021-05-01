@@ -266,7 +266,7 @@ fit_model_ORC_L_MultiLORS = function(data) {
     tolerance = 1e-6
   )$best_Beta
 
-  return(list(Beta = Beta, Y_list_train = Y_list_train, indices_list_train = data$train$subsetted$indices_list))
+  return(list(Beta = Beta, Y_list_train = Y_list_train, indices_list_train = indices_list_train))
 
 }
 
@@ -282,7 +282,7 @@ fit_model_ORC_ALL_glmnet = function(data) {
                     data$validation$full$X_list,
                     data$validation$full$indices_list)$best_Beta
 
-  return(list(Beta = Beta, Y_list_train = Y_list_train, indices_list_train = data$train$subsetted$indices_list))
+  return(list(Beta = Beta, Y_list_train = Y_list_train, indices_list_train = indices_list_train))
 
 }
 
@@ -298,7 +298,7 @@ fit_model_ORC_L_ALL_glmnet = function(data) {
              data$validation$full$X_list,
              data$validation$full$indices_list)$best_Beta
 
-  return(list(Beta = Beta, Y_list_train = Y_list_train, indices_list_train = data$train$subsetted$indices_list))
+  return(list(Beta = Beta, Y_list_train = Y_list_train, indices_list_train = indices_list_train))
 
 }
 
@@ -319,7 +319,7 @@ fit_model_ORC_L_ALL_MultiLORS = function(data) {
     tolerance = 1e-6
   )$best_Beta
 
-  return(list(Beta = Beta, Y_list_train = Y_list_train, indices_list_train = data$train$subsetted$indices_list))
+  return(list(Beta = Beta, Y_list_train = Y_list_train, indices_list_train = indices_list_train))
 
 }
 
