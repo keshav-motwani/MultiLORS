@@ -70,6 +70,15 @@ simulate_L_list = function(n_k, q, theta) {
 
 }
 
+solve_c = function(X, Beta, L, E, R2, i) {
+  min_function = function(c) {
+    abs(((var(c * X %*% Beta[-1, i] + E[, i]) - var(-L[, i] + E[, i])) / var(-L[, i] + E[, i])) - (R2 / (1 - R2)))
+  }
+  result = optimize(min_function, c(0, 20), tol = 1e-100)
+  print(result)
+  result$minimum
+}
+
 #' simulate row-sparse Beta matrix
 #'
 #' @param p
@@ -93,18 +102,16 @@ simulate_Beta = function(p, q, sparsity, R2 = NULL, X = NULL, L = NULL, E = NULL
 
     Beta[-1, ] = Beta[-1, ] %*% diag(1/sqrt(colSums(Beta[-1, ] ^ 2)))
 
-    var_error = matrixStats::colVars(L + E)
-
-    c = sqrt(var_error * R2 / (1 - R2) / matrixStats::colVars(X %*% Beta[-1, ]))
+    c = sapply(1:q, function(i) solve_c(X, Beta, L, E, R2, i))
 
     Beta[-1, ] = Beta[-1, ] %*% diag(c)
 
   }
 
-  # Y = cbind(1, X) %*% Beta + L + E
-  # SST = sum((Y - (rep(1, nrow(Y)) %*% crossprod(rep(1/nrow(Y), nrow(Y)), Y))) ^ 2)
-  # SSE = sum((Y - cbind(1, X) %*% Beta) ^ 2)
-  # print((SST - SSE) / SST)
+  Y = cbind(1, X) %*% Beta + E
+  SST = colSums((Y - (rep(1, nrow(Y)) %*% crossprod(rep(1/nrow(Y), nrow(Y)), Y))) ^ 2)
+  SSE = colSums((Y - cbind(1, X) %*% Beta - L) ^ 2)
+  print((SST - SSE) / SST)
 
   return(Beta)
 
